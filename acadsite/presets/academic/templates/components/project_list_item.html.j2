@@ -1,0 +1,22 @@
+{% from "components/tech_pills.html.j2" import tech_pills %}
+{% macro project_list_item(item) %}
+<article class="project-row">
+  <div class="project-row-main">
+    <div class="project-row-head">
+      <h3 class="project-row-title">
+        {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+      </h3>
+      {% if item.display_date %}<span class="project-row-date">{{ item.display_date }}</span>{% endif %}
+    </div>
+    {% if item.summary_html %}<div class="project-row-summary">{{ item.summary_html | safe }}</div>{% endif %}
+    <div class="project-row-meta">
+      {% set techs = item.technologies | default(item.tags) %}
+      {{ tech_pills(techs) }}
+      <div class="link-row">
+        {% for link in item.links %}<a class="link-btn" href="{{ link.url | media_url }}" rel="noopener">{{ link.label }}</a>{% endfor %}
+        {% if item.github %}<a class="link-btn" href="{{ item.github | media_url }}" rel="noopener">GitHub</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</article>
+{% endmacro %}

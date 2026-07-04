@@ -1,6 +1,6 @@
 {% from "components/tag_list.html.j2" import tag_list %}
 {% from "components/link_list.html.j2" import link_list %}
-{% macro timeline_item(item) %}
+{% macro timeline_item(item, compact=false) %}
 <div class="exp-item">
   {% if item.logo %}
   <div class="exp-logo"><img src="{{ item.logo | media_url }}" alt="{{ item.org | default(item.title) }}"></div>
@@ -15,7 +15,9 @@
       </p>
       {% if item.display_date %}<span class="exp-date">{{ item.display_date }}</span>{% endif %}
     </div>
+    {% if item.location %}<p class="exp-location">{{ item.location }}</p>{% endif %}
     {% if item.summary_html %}<div class="exp-summary">{{ item.summary_html | safe }}</div>{% endif %}
+    {% if item.body_html and not compact %}<div class="exp-detail prose">{{ item.body_html | safe }}</div>{% endif %}
     {{ tag_list(item.tags) }}
     {{ link_list(item.links) }}
   </div>

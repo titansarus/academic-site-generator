@@ -1,27 +1,19 @@
+{% from "components/tech_pills.html.j2" import tech_pills %}
 {% macro project_card(item) %}
-<article class="card project-card">
-  <div class="card-thumb">
-    {% if item.image %}
-    <img src="{{ item.image | media_url }}" alt="{{ item.title }}" loading="lazy">
-    {% else %}
-    <span class="card-thumb-fallback">{{ item.title[:2] | upper }}</span>
-    {% endif %}
-  </div>
+<article class="card project-card{% if not item.image %} project-card-flat{% endif %}">
+  {% if item.image %}
+  <div class="card-thumb"><img src="{{ item.image | media_url }}" alt="{{ item.title }}" loading="lazy"></div>
+  {% endif %}
   <div class="card-body">
-    <h3 class="card-title">
-      {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
-    </h3>
-    {% if item.display_date %}<p class="card-date">{{ item.display_date }}</p>{% endif %}
+    <div class="project-card-head">
+      <h3 class="card-title">
+        {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+      </h3>
+      {% if item.display_date %}<span class="card-date">{{ item.display_date }}</span>{% endif %}
+    </div>
     {% if item.summary_html %}<div class="card-summary">{{ item.summary_html | safe }}</div>{% endif %}
     {% set techs = item.technologies | default(item.tags) %}
-    {% if techs %}
-    <ul class="pill-list" role="list">
-      {% for t in techs %}
-      {% set ic = tech_icon(t) %}
-      <li class="pill">{% if ic %}<img class="pill-icon" src="{{ ic }}" alt="" aria-hidden="true" loading="lazy">{% endif %}{{ t }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
+    {{ tech_pills(techs) }}
     <div class="link-row">
       {% for link in item.links %}<a class="link-btn" href="{{ link.url | media_url }}" rel="noopener">{{ link.label }}</a>{% endfor %}
       {% if item.github %}<a class="link-btn" href="{{ item.github | media_url }}" rel="noopener">GitHub</a>{% endif %}

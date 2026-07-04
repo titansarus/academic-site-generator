@@ -72,7 +72,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .header-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .brand { font-family: var(--font-mono); font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
-.nav { display: flex; gap: 26px; align-items: center; }
+.nav { display: flex; gap: 20px; align-items: center; }
 .nav-link { font-size: 14px; color: var(--color-text-muted); padding-bottom: 4px; border-bottom: 2px solid transparent; transition: color .15s; }
 .nav-link:hover { color: var(--color-text); }
 .nav-link.active { color: var(--color-text); font-weight: 600; border-bottom-color: var(--color-accent); }
@@ -171,6 +171,25 @@ button { font-family: inherit; cursor: pointer; }
 .card-date { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); margin: 0 0 8px; }
 .card-summary { font-size: 14.5px; line-height: 1.6; color: var(--color-text-muted); margin: 0 0 12px; flex: 1; }
 
+/* Project card (Design B): no empty image box when there is no image; a slim
+   accent bar gives the card presence instead of a blank thumbnail. */
+.project-card-flat { border-top: 3px solid var(--color-accent); }
+.project-card .card-body { padding-top: 16px; }
+.project-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.project-card-head .card-title { margin: 0; }
+.project-card-head .card-date { margin: 0; white-space: nowrap; }
+
+/* Project list (Design A): horizontal rows, no image, like the experience list. */
+.project-list { margin-top: 8px; }
+.project-row { padding: 18px 0; border-bottom: 1px solid var(--color-border); }
+.project-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.project-row-title { font-size: 16px; font-weight: 600; margin: 0; }
+.project-row-title a:hover { color: var(--color-accent); }
+.project-row-date { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
+.project-row-summary { font-size: 14.5px; line-height: 1.6; color: var(--color-text-muted); margin: 8px 0 0; }
+.project-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+.project-row-meta .pill-list, .project-row-meta .link-row { margin-top: 10px; }
+
 /* ---------- Timeline / experience ---------- */
 .timeline { margin-top: 4px; }
 .exp-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--color-border); }
@@ -184,6 +203,11 @@ button { font-family: inherit; cursor: pointer; }
 .exp-org { font-weight: 400; color: var(--color-text-muted); }
 .exp-date { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
 .exp-summary { font-size: 14.5px; line-height: 1.6; color: var(--color-text-muted); margin: 8px 0 0; }
+.exp-location { font-size: 12.5px; color: var(--color-text-muted); font-family: var(--font-mono); margin: 2px 0 0; }
+.exp-detail { font-size: 14px; margin-top: 8px; }
+.exp-detail ul { padding-left: 18px; margin: 4px 0; }
+.exp-detail li { margin: 3px 0; }
+.exp-detail strong { color: var(--color-text); }
 .collapsible[hidden] { display: none; }
 .see-more { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; background: transparent; border: 1px solid var(--color-border); border-radius: 999px; padding: 8px 18px; font-family: var(--font-mono); font-size: 13px; color: var(--color-text); }
 .see-more:hover { border-color: var(--color-accent); }

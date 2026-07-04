@@ -26,10 +26,10 @@
       {% elif type == 'timeline' %}
         {% set limit = section.limit | default(section['items'] | length) %}
         <div class="timeline">
-          {% for item in section.all_items[:limit] %}{{ timeline_item(item) }}{% endfor %}
+          {% for item in section.all_items[:limit] %}{{ timeline_item(item, true) }}{% endfor %}
           {% if section.mode == 'expandable' and section.all_items | length > limit %}
           <div class="collapsible" data-collapsible hidden>
-            {% for item in section.all_items[limit:] %}{{ timeline_item(item) }}{% endfor %}
+            {% for item in section.all_items[limit:] %}{{ timeline_item(item, true) }}{% endfor %}
           </div>
           {% endif %}
         </div>

@@ -1,0 +1,12 @@
+{# Technology pills with optional icons. Icons come from the `tech_icon`
+   global (driven by the site's `tech_icons` config map), so this stays generic. #}
+{% macro tech_pills(techs) %}
+{% if techs %}
+<ul class="pill-list" role="list">
+  {% for t in techs %}
+  {% set ic = tech_icon(t) %}
+  <li class="pill">{% if ic %}<img class="pill-icon" src="{{ ic }}" alt="" aria-hidden="true" loading="lazy">{% endif %}{{ t }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endmacro %}
