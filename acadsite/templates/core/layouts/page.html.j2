@@ -1,0 +1,11 @@
+{% extends "base.html.j2" %}
+{% from "components/markdown_section.html.j2" import markdown_section %}
+{% block content %}
+<div class="container section">
+  <h1 class="heading">{{ page.title }}</h1>
+  {% if body_html %}<div class="prose">{{ body_html | safe }}</div>{% endif %}
+  {% for collection in collections %}
+  {% for item in collection.items %}{{ markdown_section(item) }}{% endfor %}
+  {% endfor %}
+</div>
+{% endblock %}

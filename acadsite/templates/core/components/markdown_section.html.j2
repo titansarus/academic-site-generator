@@ -1,0 +1,14 @@
+{% from "components/tag_list.html.j2" import tag_list %}
+{% macro markdown_section(item) %}
+<section class="md-section" id="{{ item.slug }}">
+  <div class="md-section-head">
+    <h3 class="md-section-title">
+      {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+    </h3>
+    {% if item.category %}<span class="md-section-cat">{{ item.category }}</span>{% endif %}
+  </div>
+  {% if item.summary_html %}<div class="md-section-summary">{{ item.summary_html | safe }}</div>{% endif %}
+  {% if item.body_html %}<div class="prose">{{ item.body_html | safe }}</div>{% endif %}
+  {{ tag_list(item.tags) }}
+</section>
+{% endmacro %}

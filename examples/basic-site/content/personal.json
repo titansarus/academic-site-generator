@@ -1,0 +1,8 @@
+[
+  { "title": "Reading List", "slug": "reading-list", "category": "notes",
+    "tags": ["books"], "summary": "Books I have enjoyed recently.",
+    "body": "markdown/personal/reading-list.md" },
+  { "title": "Trail Running", "slug": "trail-running", "category": "outdoors",
+    "tags": ["running"], "summary": "Notes from the trails.",
+    "body": "markdown/personal/trail-running.md" }
+]

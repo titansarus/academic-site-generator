@@ -1,0 +1,71 @@
+{
+  "preset": "academic",
+  "site": {
+    "title": "Jordan Rivera",
+    "brand": "J. Rivera",
+    "author": "Jordan Rivera",
+    "description": "Demo academic site built with the acadsite generator.",
+    "base_url": "https://example.com",
+    "base_path": "/",
+    "favicon": "🔬",
+    "social": [
+      { "label": "Email", "url": "mailto:jordan@example.com", "glyph": "@", "handle": "jordan@example.com" },
+      { "label": "GitHub", "url": "https://github.com/", "glyph": "GH", "handle": "github.com/jordan" }
+    ]
+  },
+  "theme": { "default": "system", "accent": "blue" },
+  "math": true,
+  "feed": { "enabled": true, "collection": "blog", "title": "Jordan Rivera — Blog" },
+  "collections": {
+    "publications": {
+      "label": "Publications", "slug": "publications", "source": "content/publications.json",
+      "type": "publication-list", "schema": "publication_item", "sort_by": "year", "sort_order": "desc",
+      "detail_pages": false
+    },
+    "experience": {
+      "label": "Experience", "slug": "experience", "source": "content/experience.json",
+      "type": "timeline", "schema": "timeline_item", "sort_by": "start_date", "sort_order": "desc",
+      "group_by": "category", "detail_pages": false
+    },
+    "projects": {
+      "label": "Projects", "slug": "projects", "source": "content/projects.json",
+      "type": "cards", "schema": "project_item", "sort_by": "date", "sort_order": "desc",
+      "detail_pages": true
+    },
+    "blog": {
+      "label": "Blog", "slug": "blog", "source": "content/blog.json",
+      "type": "blog", "sort_by": "date", "sort_order": "desc", "detail_pages": true,
+      "detail_layout": "blog_post"
+    },
+    "personal_sections": {
+      "label": "Personal", "slug": "personal", "source": "content/personal.json",
+      "type": "markdown-sections", "schema": "markdown_item", "detail_pages": true
+    }
+  },
+  "homepage": {
+    "sections": [
+      { "type": "hero", "source": "content/profile.json" },
+      { "type": "news", "title": "News", "source": "content/news.json" },
+      { "type": "collection_preview", "title": "Selected Publications", "eyebrow": "Research",
+        "collection": "publications", "filter": { "selected": true }, "limit": 3, "link_to_full_page": true },
+      { "type": "collection_preview", "title": "Projects", "eyebrow": "Selected Work",
+        "collection": "projects", "limit": 3, "link_to_full_page": true },
+      { "type": "collection_preview", "title": "Experience", "eyebrow": "Experience",
+        "collection": "experience", "limit": 3, "mode": "expandable", "link_to_full_page": true },
+      { "type": "collection_preview", "title": "Personal", "eyebrow": "Outside Work",
+        "collection": "personal_sections", "limit": 3, "link_to_full_page": true }
+    ]
+  },
+  "pages": [
+    { "title": "Publications", "slug": "publications", "layout": "collection_page", "collections": ["publications"] },
+    { "title": "Experience", "slug": "experience", "layout": "collection_page", "collections": ["experience"] },
+    { "title": "Projects", "slug": "projects", "layout": "collection_page", "collections": ["projects"] },
+    { "title": "Blog", "slug": "blog", "layout": "collection_page", "collections": ["blog"] },
+    { "title": "Personal", "slug": "personal", "layout": "collection_page", "collections": ["personal_sections"] }
+  ],
+  "environments": {
+    "github-pages": {
+      "site": { "base_url": "https://example.github.io", "base_path": "/demo-site/", "custom_domain": null }
+    }
+  }
+}

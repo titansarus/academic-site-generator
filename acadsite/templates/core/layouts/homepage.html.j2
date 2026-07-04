@@ -1,0 +1,24 @@
+{% extends "base.html.j2" %}
+{% from "components/card.html.j2" import card %}
+{% from "components/timeline_item.html.j2" import timeline_item %}
+{% block content %}
+{% for section in sections %}
+  {% if section.type == 'hero' %}
+  <section class="container section hero">
+    <h1 class="hero-name">{{ section.profile.name | default(site.title) }}</h1>
+    {% if section.profile.tagline %}<p class="hero-title">{{ section.profile.tagline }}</p>{% endif %}
+    {% if section.profile.about_html %}<div class="prose">{{ section.profile.about_html | safe }}</div>{% endif %}
+  </section>
+  {% elif section.type == 'collection_preview' %}
+  <section class="container section">
+    <h2 class="heading">{{ section.title | default(section.collection.label) }}</h2>
+    <div class="card-grid">{% for item in section['items'] %}{{ card(item) }}{% endfor %}</div>
+    {% if section.link_to_full_page and section.full_url %}
+    <a class="view-all" href="{{ section.full_url }}">View all →</a>
+    {% endif %}
+  </section>
+  {% elif section.type == 'markdown' %}
+  <section class="container section"><div class="prose">{{ section.html | safe }}</div></section>
+  {% endif %}
+{% endfor %}
+{% endblock %}

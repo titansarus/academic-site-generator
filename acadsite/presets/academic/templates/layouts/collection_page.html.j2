@@ -1,0 +1,44 @@
+{% extends "base.html.j2" %}
+{% from "components/publication_item.html.j2" import publication_item %}
+{% from "components/project_card.html.j2" import project_card %}
+{% from "components/timeline_item.html.j2" import timeline_item %}
+{% from "components/markdown_section.html.j2" import markdown_section %}
+
+{% macro render_collection(collection) %}
+  {% set type = collection.type %}
+  {% if collection.groups %}
+    {% for group in collection.groups %}
+    <div class="exp-group">
+      <p class="group-heading">{{ group.category }}</p>
+      <div class="timeline">{% for item in group['items'] %}{{ timeline_item(item) }}{% endfor %}</div>
+    </div>
+    {% endfor %}
+  {% elif type == 'publication-list' %}
+    <div class="pub-list">{% for item in collection['items'] %}{{ publication_item(item) }}{% endfor %}</div>
+  {% elif type in ['cards', 'grid', 'blog'] %}
+    <div class="card-grid">{% for item in collection['items'] %}{{ project_card(item) }}{% endfor %}</div>
+  {% elif type == 'markdown-sections' %}
+    <div class="md-sections">{% for item in collection['items'] %}{{ markdown_section(item) }}{% endfor %}</div>
+  {% else %}
+    <div class="timeline">{% for item in collection['items'] %}{{ timeline_item(item) }}{% endfor %}</div>
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="section">
+  <div class="container">
+    <h1 class="page-title">{{ page.title }}</h1>
+    {% if body_html %}<div class="prose page-intro">{{ body_html | safe }}</div>{% endif %}
+    {% for collection in collections %}
+    <section class="collection" id="{{ collection.slug }}">
+      {% if collections | length > 1 %}<h2 class="heading">{{ collection.label }}</h2>{% endif %}
+      {% if collection['items'] %}
+        {{ render_collection(collection) }}
+      {% else %}
+        <p class="empty-note">No entries yet.</p>
+      {% endif %}
+    </section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

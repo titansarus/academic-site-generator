@@ -1,0 +1,10 @@
+{% extends "base.html.j2" %}
+{% block title %}Page not found · {{ site.title }}{% endblock %}
+{% block content %}
+<div class="container section not-found">
+  <p class="eyebrow">Error 404</p>
+  <h1 class="heading">Page not found</h1>
+  <p class="hero-lead">The page you are looking for does not exist or has moved.</p>
+  <a class="view-all" href="{{ url() }}">Return home →</a>
+</div>
+{% endblock %}

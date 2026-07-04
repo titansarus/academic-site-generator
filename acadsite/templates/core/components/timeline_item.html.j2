@@ -1,0 +1,23 @@
+{% from "components/tag_list.html.j2" import tag_list %}
+{% from "components/link_list.html.j2" import link_list %}
+{% macro timeline_item(item) %}
+<div class="exp-item">
+  {% if item.logo %}
+  <div class="exp-logo"><img src="{{ item.logo | media_url }}" alt="{{ item.org | default(item.title) }}"></div>
+  {% elif item.logo_initials %}
+  <div class="exp-logo exp-logo-text">{{ item.logo_initials }}</div>
+  {% endif %}
+  <div class="exp-body">
+    <div class="exp-head">
+      <p class="exp-title">
+        {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+        {% if item.org %}<span class="exp-org">· {{ item.org }}</span>{% endif %}
+      </p>
+      {% if item.display_date %}<span class="exp-date">{{ item.display_date }}</span>{% endif %}
+    </div>
+    {% if item.summary_html %}<div class="exp-summary">{{ item.summary_html | safe }}</div>{% endif %}
+    {{ tag_list(item.tags) }}
+    {{ link_list(item.links) }}
+  </div>
+</div>
+{% endmacro %}

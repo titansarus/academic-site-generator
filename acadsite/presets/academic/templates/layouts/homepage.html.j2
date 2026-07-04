@@ -1,0 +1,112 @@
+{% extends "base.html.j2" %}
+{% from "components/publication_item.html.j2" import publication_item %}
+{% from "components/project_card.html.j2" import project_card %}
+{% from "components/timeline_item.html.j2" import timeline_item %}
+{% from "components/personal_card.html.j2" import personal_card %}
+{% from "components/news_item.html.j2" import news_item %}
+
+{% macro preview(section) %}
+  {% set col = section.collection %}
+  {% set type = col.type %}
+  <section class="section section-wide" id="{{ col.slug }}">
+    <div class="container">
+      {% if section.eyebrow %}<p class="eyebrow">{{ section.eyebrow }}</p>{% endif %}
+      <h2 class="heading">{{ section.title | default(col.label) }}</h2>
+
+      {% if type == 'publication-list' %}
+        <div class="pub-list">{% for item in section['items'] %}{{ publication_item(item) }}{% endfor %}</div>
+
+      {% elif type in ['cards', 'grid'] %}
+        <div class="card-grid">{% for item in section['items'] %}{{ project_card(item) }}{% endfor %}</div>
+
+      {% elif type == 'markdown-sections' %}
+        <div class="personal-grid">{% for item in section['items'] %}{{ personal_card(item) }}{% endfor %}</div>
+
+      {% elif type == 'timeline' %}
+        {% set limit = section.limit | default(section['items'] | length) %}
+        <div class="timeline">
+          {% for item in section.all_items[:limit] %}{{ timeline_item(item) }}{% endfor %}
+          {% if section.mode == 'expandable' and section.all_items | length > limit %}
+          <div class="collapsible" data-collapsible hidden>
+            {% for item in section.all_items[limit:] %}{{ timeline_item(item) }}{% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% if section.mode == 'expandable' and section.all_items | length > limit %}
+        <button class="see-more" type="button" data-see-more aria-expanded="false">
+          <span data-see-more-label>Show more</span> <span class="chevron">⌄</span>
+        </button>
+        {% endif %}
+
+      {% else %}
+        <div class="card-grid">{% for item in section['items'] %}{{ project_card(item) }}{% endfor %}</div>
+      {% endif %}
+
+      {% if section.link_to_full_page and section.full_url %}
+      <a class="view-all" href="{{ section.full_url }}">View all {{ (section.title | default(col.label)) | lower }} →</a>
+      {% endif %}
+    </div>
+  </section>
+{% endmacro %}
+
+{% block content %}
+{% for section in sections %}
+
+  {% if section.type == 'hero' %}
+  {% set p = section.profile %}
+  <section class="hero-section">
+    <div class="container hero-grid">
+      <div class="hero-col">
+        {% if p.photo %}
+        <div class="hero-photo"><img src="{{ p.photo | media_url }}" alt="{{ p.name }}"></div>
+        {% else %}
+        <div class="hero-photo hero-photo-fallback"><span>{{ (p.name | default(site.title))[:1] }}</span></div>
+        {% endif %}
+        <h1 class="hero-name">{{ p.name | default(site.title) }}</h1>
+        {% if p.tagline %}<p class="hero-title">{{ p.tagline }}</p>{% endif %}
+        {% if p.affiliation %}<p class="hero-affil">{{ p.affiliation }}</p>{% endif %}
+        {% if p.lead %}<p class="hero-lead">{{ p.lead }}</p>{% endif %}
+        <div class="chip-row">
+          {% if site.cv %}<a class="btn btn-primary" href="{{ site.cv | media_url }}">View CV</a>{% endif %}
+          {% for link in p.links | default([]) %}
+          <a class="chip" href="{{ link.url | media_url }}" title="{{ link.label }}" aria-label="{{ link.label }}">
+            <span class="chip-glyph">{{ link.glyph | default(link.label[:2]) }}</span>
+            <span>{{ link.handle | default(link.label) }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="hero-info">
+        {% if p.about_html %}
+        <div><p class="eyebrow">About</p><div class="prose hero-about">{{ p.about_html | safe }}</div></div>
+        {% endif %}
+        {% if p.research_interests %}
+        <div>
+          <p class="eyebrow">Research Interests</p>
+          <ul class="pill-list" role="list">{% for t in p.research_interests %}<li class="pill">{{ t }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  {% elif section.type == 'news' %}
+  <section class="section section-wide" id="news">
+    <div class="container">
+      <p class="eyebrow">Recent</p>
+      <h2 class="heading">{{ section.title | default('News') }}</h2>
+      <ul class="news-list">{% for item in section['items'] %}{{ news_item(item) }}{% endfor %}</ul>
+    </div>
+  </section>
+
+  {% elif section.type == 'collection_preview' %}
+    {% if section.get('collection') %}{{ preview(section) }}{% endif %}
+
+  {% elif section.type == 'markdown' %}
+  <section class="section section-wide">
+    <div class="container"><div class="prose">{{ section.html | safe }}</div></div>
+  </section>
+  {% endif %}
+
+{% endfor %}
+{% endblock %}

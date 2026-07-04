@@ -1,0 +1,8 @@
+[
+  { "title": "Why Scheduling Is Hard", "date": "2025-03-10", "tags": ["systems", "scheduling"],
+    "summary": "A short intro to the surprising difficulty of cluster scheduling.",
+    "body": "markdown/posts/why-scheduling-is-hard.md" },
+  { "title": "Notes on Reading Systems Papers", "date": "2024-11-02", "tags": ["advice"],
+    "summary": "How I read and take notes on systems research papers.",
+    "body": "markdown/posts/reading-systems-papers.md" }
+]

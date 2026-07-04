@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Markdown section item",
+  "type": "object",
+  "required": ["title"],
+  "additionalProperties": true,
+  "properties": {
+    "title": { "type": "string" },
+    "slug": { "type": "string" },
+    "category": { "type": "string" },
+    "summary": { "type": "string" },
+    "body": { "type": "string" },
+    "tags": { "type": "array" },
+    "featured": { "type": "boolean" },
+    "draft": { "type": "boolean" }
+  }
+}

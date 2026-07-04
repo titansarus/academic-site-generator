@@ -1,0 +1,18 @@
+{% from "components/tag_list.html.j2" import tag_list %}
+{% from "components/link_list.html.j2" import link_list %}
+{% macro card(item) %}
+<article class="card">
+  {% if item.image %}
+  <div class="card-thumb"><img src="{{ item.image | media_url }}" alt="{{ item.title }}" loading="lazy"></div>
+  {% endif %}
+  <div class="card-body">
+    <h3 class="card-title">
+      {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+    </h3>
+    {% if item.display_date %}<p class="card-date">{{ item.display_date }}</p>{% endif %}
+    {% if item.summary_html %}<div class="card-summary">{{ item.summary_html | safe }}</div>{% endif %}
+    {{ tag_list(item.tags) }}
+    {{ link_list(item.links) }}
+  </div>
+</article>
+{% endmacro %}

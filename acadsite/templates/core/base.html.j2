@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default('en') }}" data-theme-default="{{ theme.default | default('system') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ page.title }} · {{ site.title }}{% endblock %}</title>
+  <meta name="description" content="{{ page.description | default(site.description) | default('') }}">
+  {% if site.author %}<meta name="author" content="{{ site.author }}">{% endif %}
+  {% if site.base_url %}<link rel="canonical" href="{{ site.base_url }}{{ url(page.slug) }}">{% endif %}
+  <meta property="og:title" content="{{ page.title }} · {{ site.title }}">
+  <meta property="og:type" content="website">
+  {% block head_extra %}{% endblock %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('assets/css/academic.css') }}">
+  {% if config.site.custom_css %}<link rel="stylesheet" href="{{ asset('assets/css/site.css') }}">{% endif %}
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>{{ site.favicon | default('🎓') }}</text></svg>">
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem('acadsite-theme');
+        var def = document.documentElement.getAttribute('data-theme-default');
+        var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = pref || (def === 'dark' ? 'dark' : def === 'light' ? 'light' : (sysDark ? 'dark' : 'light'));
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  {% if math_enabled %}
+  <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  {% endif %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url() }}">{{ site.brand | default(site.title) }}</a>
+      <nav class="nav" aria-label="Primary">
+        {% for item in nav %}
+        <a class="nav-link{% if item.active %} active{% endif %}" href="{{ item.href }}">{{ item.label }}</a>
+        {% endfor %}
+      </nav>
+      <div class="controls">
+        <button class="theme-toggle" type="button" aria-label="Toggle dark mode" data-theme-toggle>
+          <span class="theme-toggle-label" data-theme-label>Light</span>
+          <span class="theme-track"><span class="theme-knob"></span></span>
+        </button>
+        {% if site.cv %}<a class="btn btn-primary" href="{{ site.cv | media_url }}">View CV</a>{% endif %}
+        <button class="mobile-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" data-mobile-toggle>
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <nav class="mobile-nav" aria-label="Mobile" data-mobile-nav hidden>
+      {% for item in nav %}
+      <a class="mobile-nav-link{% if item.active %} active{% endif %}" href="{{ item.href }}">{{ item.label }}</a>
+      {% endfor %}
+      {% if site.cv %}<a class="mobile-nav-link" href="{{ site.cv | media_url }}">View CV</a>{% endif %}
+    </nav>
+  </header>
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-name">{{ site.brand | default(site.title) }}</p>
+        <p class="footer-copy">© {{ now_year }} {{ site.author | default(site.title) }}. Built with a Python static site generator.</p>
+      </div>
+      {% if site.social %}
+      <ul class="footer-social">
+        {% for s in site.social %}
+        <li><a href="{{ s.url | media_url }}" title="{{ s.label }}" aria-label="{{ s.label }}">
+          <span class="footer-glyph">{{ s.glyph | default(s.label[:2]) }}</span>
+          <span>{{ s.handle | default(s.label) }}</span>
+        </a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </footer>
+
+  <script src="{{ asset('assets/js/theme-toggle.js') }}" defer></script>
+  <script src="{{ asset('assets/js/academic.js') }}" defer></script>
+  {% if config.site.custom_js %}<script src="{{ asset('assets/js/site.js') }}" defer></script>{% endif %}
+</body>
+</html>

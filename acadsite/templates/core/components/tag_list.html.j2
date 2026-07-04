@@ -1,0 +1,7 @@
+{% macro tag_list(tags) %}
+{% if tags %}
+<ul class="pill-list" role="list">
+  {% for tag in tags %}<li class="pill">{{ tag }}</li>{% endfor %}
+</ul>
+{% endif %}
+{% endmacro %}

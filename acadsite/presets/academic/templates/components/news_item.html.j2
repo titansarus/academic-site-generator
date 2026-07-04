@@ -1,0 +1,8 @@
+{% macro news_item(item) %}
+<li class="news-item">
+  <span class="news-date">{{ item.date_display | default(item.date) }}</span>
+  <span class="news-text">
+    {% if item.href %}<a href="{{ item.href | media_url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}
+  </span>
+</li>
+{% endmacro %}

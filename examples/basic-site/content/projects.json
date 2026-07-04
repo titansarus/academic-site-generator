@@ -1,0 +1,14 @@
+[
+  { "title": "SchedSim", "date": "2025-01", "featured": true,
+    "summary": "An open-source simulator for large-scale cluster scheduling policies.",
+    "technologies": ["Python", "Go", "gRPC"],
+    "body": "markdown/projects/schedsim.md",
+    "links": [{ "label": "GitHub", "url": "https://github.com/" }] },
+  { "title": "LatencyLens", "date": "2024-05",
+    "summary": "A lightweight tail-latency prediction toolkit.",
+    "technologies": ["Rust", "PyTorch"],
+    "links": [{ "label": "Docs", "url": "https://example.com/latencylens" }] },
+  { "title": "ReliableFS", "date": "2023-03",
+    "summary": "A teaching-oriented reliable distributed file system.",
+    "technologies": ["C++", "Raft"] }
+]

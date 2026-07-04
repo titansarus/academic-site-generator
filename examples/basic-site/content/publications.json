@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Efficient Scheduling for Large-Scale Learning Clusters",
+    "authors": "Jordan Rivera, Alex Chen, Priya Nair",
+    "venue": "SOSP",
+    "year": 2025,
+    "selected": true,
+    "doi": "10.1145/0000000.0000001",
+    "links": [{ "label": "Project", "url": "https://example.com/scheduling" }]
+  },
+  {
+    "title": "Predicting Tail Latency with Lightweight Models",
+    "authors": "Jordan Rivera, Sam Okafor",
+    "venue": "NSDI",
+    "year": 2024,
+    "selected": true,
+    "bibtex": "@inproceedings{rivera2024tail,\n  title={Predicting Tail Latency with Lightweight Models},\n  author={Rivera, Jordan and Okafor, Sam},\n  booktitle={NSDI},\n  year={2024}\n}"
+  },
+  {
+    "title": "A Survey of Reliability Techniques in Cloud Storage",
+    "authors": "Jordan Rivera",
+    "venue": "ACM Computing Surveys",
+    "year": 2023,
+    "selected": false
+  }
+]

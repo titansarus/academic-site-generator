@@ -1,0 +1,9 @@
+{% macro link_list(links, extra_class='') %}
+{% if links %}
+<div class="link-row {{ extra_class }}">
+  {% for link in links %}
+  <a class="link-btn" href="{{ link.url | media_url }}"{% if link.external | default(true) %} rel="noopener"{% endif %}>{{ link.label }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}

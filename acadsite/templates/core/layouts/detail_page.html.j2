@@ -1,0 +1,14 @@
+{% extends "base.html.j2" %}
+{% from "components/tag_list.html.j2" import tag_list %}
+{% from "components/link_list.html.j2" import link_list %}
+{% block content %}
+<article class="container section detail">
+  <a class="back-link" href="{{ url(collection.slug) }}">← {{ collection.label }}</a>
+  <h1 class="detail-title">{{ item.title }}</h1>
+  {% if item.display_date %}<p class="detail-meta">{{ item.display_date }}</p>{% endif %}
+  {% if item.summary_html %}<div class="detail-summary">{{ item.summary_html | safe }}</div>{% endif %}
+  {{ tag_list(item.tags) }}
+  {{ link_list(item.links) }}
+  {% if item.body_html %}<div class="prose">{{ item.body_html | safe }}</div>{% endif %}
+</article>
+{% endblock %}

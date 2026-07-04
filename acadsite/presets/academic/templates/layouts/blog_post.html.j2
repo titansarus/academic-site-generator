@@ -1,0 +1,17 @@
+{% extends "base.html.j2" %}
+{% from "components/tag_list.html.j2" import tag_list %}
+{% block content %}
+<article class="section blog-post">
+  <div class="container container-narrow">
+    <a class="back-link" href="{{ url(collection.slug) }}">← {{ collection.label }}</a>
+    <h1 class="detail-title">{{ item.title }}</h1>
+    <div class="detail-meta">
+      {% if item.display_date %}<span>{{ item.display_date }}</span>{% endif %}
+      {% if item.reading_time %}<span>· {{ item.reading_time }} min read</span>{% endif %}
+    </div>
+    {{ tag_list(item.tags) }}
+    {% if item.summary_html %}<div class="detail-summary prose">{{ item.summary_html | safe }}</div>{% endif %}
+    {% if item.body_html %}<div class="prose detail-body">{{ item.body_html | safe }}</div>{% endif %}
+  </div>
+</article>
+{% endblock %}

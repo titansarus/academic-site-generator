@@ -1,0 +1,17 @@
+{
+  "name": "academic",
+  "description": "Academic preset: publication lists, timelines, project cards, blog, news, and freeform Markdown sections. All academic behavior is configuration and templates, never hardcoded engine logic.",
+  "version": "0.1.0",
+  "defaults": {
+    "site": { "lang": "en" },
+    "theme": { "default": "system", "accent": "blue" }
+  },
+  "collection_types": {
+    "publication-list": { "item_component": "publication_item" },
+    "timeline": { "item_component": "timeline_item" },
+    "cards": { "item_component": "project_card" },
+    "grid": { "item_component": "project_card" },
+    "blog": { "item_component": "card", "detail_layout": "blog_post" },
+    "markdown-sections": { "item_component": "markdown_section" }
+  }
+}

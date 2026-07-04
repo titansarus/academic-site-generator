@@ -1,0 +1,28 @@
+{% extends "base.html.j2" %}
+{% from "components/card.html.j2" import card %}
+{% from "components/timeline_item.html.j2" import timeline_item %}
+{% from "components/markdown_section.html.j2" import markdown_section %}
+{% block content %}
+<div class="container section">
+  {% if body_html %}<div class="prose">{{ body_html | safe }}</div>{% endif %}
+  {% for collection in collections %}
+  <section class="collection" id="{{ collection.slug }}">
+    <h1 class="heading">{{ collection.label }}</h1>
+    {% if collection.groups %}
+      {% for group in collection.groups %}
+      <p class="group-heading">{{ group.category }}</p>
+      {% for item in group['items'] %}{{ timeline_item(item) }}{% endfor %}
+      {% endfor %}
+    {% else %}
+      {% if collection.type in ['cards', 'grid'] %}
+      <div class="card-grid">{% for item in collection.items %}{{ card(item) }}{% endfor %}</div>
+      {% elif collection.type == 'markdown-sections' %}
+      {% for item in collection.items %}{{ markdown_section(item) }}{% endfor %}
+      {% else %}
+      {% for item in collection.items %}{{ timeline_item(item) }}{% endfor %}
+      {% endif %}
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

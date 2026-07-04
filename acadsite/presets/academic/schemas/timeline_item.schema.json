@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Timeline item",
+  "type": "object",
+  "required": ["title"],
+  "additionalProperties": true,
+  "properties": {
+    "title": { "type": "string" },
+    "org": { "type": "string" },
+    "category": { "type": "string" },
+    "start_date": { "type": ["string", "null"] },
+    "end_date": { "type": ["string", "null"] },
+    "display_date": { "type": "string" },
+    "current": { "type": "boolean" },
+    "summary": { "type": "string" },
+    "logo": { "type": "string" },
+    "logo_initials": { "type": "string" }
+  }
+}

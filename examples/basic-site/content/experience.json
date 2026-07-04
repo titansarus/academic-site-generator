@@ -1,0 +1,13 @@
+[
+  { "title": "Assistant Professor", "org": "Example University", "category": "Academic",
+    "start_date": "2023-08", "current": true, "logo_initials": "EU",
+    "summary": "Leading the Efficient Systems Lab." },
+  { "title": "Research Intern", "org": "BigCloud Research", "category": "Industry",
+    "start_date": "2021-06", "end_date": "2021-09", "logo_initials": "BC",
+    "summary": "Worked on cluster scheduling." },
+  { "title": "Graduate Teaching Assistant", "org": "Somewhere Institute of Technology", "category": "Teaching",
+    "start_date": "2019", "end_date": "2022", "logo_initials": "SIT",
+    "summary": "TA for Operating Systems and Distributed Systems." },
+  { "title": "Ph.D. in Computer Science", "org": "Somewhere Institute of Technology", "category": "Education",
+    "start_date": "2018", "end_date": "2023", "logo_initials": "SIT" }
+]

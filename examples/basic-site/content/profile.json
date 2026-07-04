@@ -1,0 +1,15 @@
+{
+  "name": "Jordan Rivera",
+  "tagline": "Assistant Professor of Computer Science",
+  "affiliation": "Example University",
+  "lead": "I study distributed systems and machine learning for systems, with a focus on efficient, reliable infrastructure.",
+  "about": "I am an assistant professor working at the intersection of **distributed systems** and **machine learning**. My group builds systems that are efficient and dependable at scale. Before joining Example University, I completed my Ph.D. at Somewhere Institute of Technology.",
+  "research_interests": [
+    "Distributed Systems", "Machine Learning for Systems", "Scheduling", "Reliability", "Cloud Computing"
+  ],
+  "links": [
+    { "label": "Email", "url": "mailto:jordan@example.com", "glyph": "@", "handle": "jordan@example.com" },
+    { "label": "Google Scholar", "url": "https://scholar.google.com/", "glyph": "GS", "handle": "Scholar" },
+    { "label": "GitHub", "url": "https://github.com/", "glyph": "GH", "handle": "GitHub" }
+  ]
+}

@@ -1,0 +1,26 @@
+{% macro publication_item(item) %}
+<article class="pub-item" id="{{ item.slug }}">
+  <p class="pub-title">
+    {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+  </p>
+  {% if item.authors %}<p class="pub-authors">{{ item.authors }}</p>{% endif %}
+  {% if item.venue or item.year %}
+  <p class="pub-venue">{{ item.venue }}{% if item.venue and item.year %} · {% endif %}{{ item.year }}</p>
+  {% endif %}
+  {% if item.summary_html %}<div class="pub-summary">{{ item.summary_html | safe }}</div>{% endif %}
+  <div class="pub-links">
+    {% for link in item.links %}
+    <a class="link-btn" href="{{ link.url | media_url }}" rel="noopener">{{ link.label }}</a>
+    {% endfor %}
+    {% if item.doi %}<a class="link-btn" href="https://doi.org/{{ item.doi }}" rel="noopener">DOI</a>{% endif %}
+    {% if item.pdf %}<a class="link-btn" href="{{ item.pdf | media_url }}" rel="noopener">PDF</a>{% endif %}
+    {% if item.code %}<a class="link-btn" href="{{ item.code | media_url }}" rel="noopener">Code</a>{% endif %}
+    {% if item.include_bibtex | default(true) %}
+    <button class="link-btn bibtex-toggle" type="button" data-bibtex-toggle aria-expanded="false">BibTeX</button>
+    {% endif %}
+  </div>
+  {% if item.include_bibtex | default(true) %}
+  <pre class="bibtex" data-bibtex hidden><code>{{ bibtex(item) }}</code></pre>
+  {% endif %}
+</article>
+{% endmacro %}
