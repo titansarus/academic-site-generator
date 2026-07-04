@@ -1,3 +1,4 @@
+{% from "components/social_icon.html.j2" import social_icon %}
 <!DOCTYPE html>
 <html lang="{{ site.lang | default('en') }}" data-theme-default="{{ theme.default | default('system') }}">
 <head>
@@ -74,8 +75,8 @@
       {% if site.social %}
       <ul class="footer-social">
         {% for s in site.social %}
-        <li><a href="{{ s.url | media_url }}" title="{{ s.label }}" aria-label="{{ s.label }}">
-          <span class="footer-glyph">{{ s.glyph | default(s.label[:2]) }}</span>
+        <li><a href="{{ s.url | media_url }}" title="{{ s.label }}" aria-label="{{ s.label }}"{% if s.icon in ['github','linkedin','telegram','google-scholar','orcid','twitter','x'] %} rel="noopener" target="_blank"{% endif %}>
+          <span class="footer-glyph">{{ social_icon(s.icon | default(s.label)) }}</span>
           <span>{{ s.handle | default(s.label) }}</span>
         </a></li>
         {% endfor %}

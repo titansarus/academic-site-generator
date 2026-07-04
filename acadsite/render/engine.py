@@ -74,7 +74,25 @@ class Engine:
         env.globals["media_url"] = self.media_url
         env.globals["bibtex"] = generate_bibtex
         env.globals["now_year"] = date.today().year
+        env.globals["tech_icon"] = self._make_tech_icon()
         return env
+
+    def _make_tech_icon(self):
+        """Return a global that maps a tech name to an icon URL via config.
+
+        Driven entirely by the site's optional ``tech_icons`` map, so the engine
+        stays generic -- it ships no built-in icon set of its own.
+        """
+        tech_map = {
+            str(k).lower(): v
+            for k, v in (self.site.data.get("tech_icons") or {}).items()
+        }
+
+        def tech_icon(name) -> str:
+            path = tech_map.get(str(name).lower())
+            return self.media_url(path) if path else ""
+
+        return tech_icon
 
     def media_url(self, path: str | None) -> str:
         """Resolve a content-supplied media path to a usable URL."""

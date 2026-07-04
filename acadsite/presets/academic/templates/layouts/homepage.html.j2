@@ -4,6 +4,7 @@
 {% from "components/timeline_item.html.j2" import timeline_item %}
 {% from "components/personal_card.html.j2" import personal_card %}
 {% from "components/news_item.html.j2" import news_item %}
+{% from "components/social_icon.html.j2" import social_icon %}
 
 {% macro preview(section) %}
   {% set col = section.collection %}
@@ -69,8 +70,8 @@
         <div class="chip-row">
           {% if site.cv %}<a class="btn btn-primary" href="{{ site.cv | media_url }}">View CV</a>{% endif %}
           {% for link in p.links | default([]) %}
-          <a class="chip" href="{{ link.url | media_url }}" title="{{ link.label }}" aria-label="{{ link.label }}">
-            <span class="chip-glyph">{{ link.glyph | default(link.label[:2]) }}</span>
+          <a class="chip" href="{{ link.url | media_url }}" title="{{ link.label }}" aria-label="{{ link.label }}"{% if link.icon in ['github','linkedin','telegram','google-scholar','orcid','twitter','x'] %} rel="noopener" target="_blank"{% endif %}>
+            <span class="chip-glyph">{{ social_icon(link.icon | default(link.label)) }}</span>
             <span>{{ link.handle | default(link.label) }}</span>
           </a>
           {% endfor %}
