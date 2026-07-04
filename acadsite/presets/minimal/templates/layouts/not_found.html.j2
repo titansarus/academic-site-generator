@@ -1,0 +1,9 @@
+{% extends "base.html.j2" %}
+{% block title %}not found — {{ site.title }}{% endblock %}
+{% block content %}
+<section class="page">
+  <h1 class="detail-h">Well, this is awkward.</h1>
+  <p class="prose lead">That page wandered off. Nothing lives at this address.</p>
+  <p class="elsewhere"><a href="{{ url() }}">← back home</a></p>
+</section>
+{% endblock %}

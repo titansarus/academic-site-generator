@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default('en') }}" data-theme-default="{{ theme.default | default('system') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ page.title }} — {{ site.title }}{% endblock %}</title>
+  <meta name="description" content="{{ page.description | default(site.description) | default('') }}">
+  {% if site.author %}<meta name="author" content="{{ site.author }}">{% endif %}
+  {% if site.base_url %}<link rel="canonical" href="{{ site.base_url }}{{ url(page.slug) }}">{% endif %}
+  <meta property="og:title" content="{{ page.title }} — {{ site.title }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Newsreader:ital,opsz@0,6..72;1,6..72&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('assets/css/minimal.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>{{ site.favicon | default('✒️') }}</text></svg>">
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem('acadsite-theme');
+        var def = document.documentElement.getAttribute('data-theme-default');
+        var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = pref || (def === 'dark' ? 'dark' : def === 'light' ? 'light' : (sysDark ? 'dark' : 'light'));
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  {% if math_enabled %}
+  <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  {% endif %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="wrap">
+    <header class="topbar">
+      <a class="wordmark" href="{{ url() }}">{{ site.brand | default(site.title) }}</a>
+      <nav class="topnav" aria-label="Primary">
+        {% for item in nav %}<a class="topnav-link{% if item.active %} here{% endif %}" href="{{ item.href }}">{{ item.label | lower }}</a>{% endfor %}
+        <button class="toggle" type="button" aria-label="Toggle dark mode" data-theme-toggle><span data-theme-label>☾</span></button>
+      </nav>
+    </header>
+
+    <main id="main">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="foot">
+      <span>© {{ now_year }} {{ site.author | default(site.title) }}</span>
+      <span class="foot-sep">·</span>
+      <span>written by hand, built with a little Python generator</span>
+    </footer>
+  </div>
+  <script src="{{ asset('assets/js/minimal.js') }}" defer></script>
+</body>
+</html>

@@ -20,7 +20,7 @@ from .validation import validate_site
 
 def _cmd_validate(args: argparse.Namespace) -> int:
     try:
-        site = load_site(args.site, env=args.env)
+        site = load_site(args.site, env=args.env, config_filename=args.config)
     except ConfigError as exc:
         print(f"config error: {exc}", file=sys.stderr)
         return 2
@@ -42,7 +42,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
 
 def _cmd_build(args: argparse.Namespace) -> int:
     try:
-        site = load_site(args.site, env=args.env)
+        site = load_site(args.site, env=args.env, config_filename=args.config)
     except ConfigError as exc:
         print(f"config error: {exc}", file=sys.stderr)
         return 2
@@ -89,12 +89,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_validate = sub.add_parser("validate", help="Validate site config and content.")
     p_validate.add_argument("--site", required=True, help="Path to the site directory.")
     p_validate.add_argument("--env", default=None, help="Environment overlay name.")
+    p_validate.add_argument("--config", default=None, help="Alternate config filename inside the site dir.")
     p_validate.set_defaults(func=_cmd_validate)
 
     p_build = sub.add_parser("build", help="Build the static site.")
     p_build.add_argument("--site", required=True, help="Path to the site directory.")
     p_build.add_argument("--output", default="public", help="Output directory.")
     p_build.add_argument("--env", default=None, help="Environment overlay name.")
+    p_build.add_argument("--config", default=None, help="Alternate config filename inside the site dir.")
     p_build.add_argument("-v", "--verbose", action="store_true", help="Verbose output.")
     p_build.add_argument("--force", action="store_true", help="Build despite validation errors.")
     p_build.set_defaults(func=_cmd_build)

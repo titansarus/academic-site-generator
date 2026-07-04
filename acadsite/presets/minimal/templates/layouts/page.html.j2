@@ -1,0 +1,18 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<section class="page">
+  <h1 class="page-h">{{ page.title | lower }}</h1>
+  {% if body_html %}<div class="prose lead">{{ body_html | safe }}</div>{% endif %}
+  {% for collection in collections %}
+  <div class="notes-long">
+    {% for item in collection['items'] %}
+    <section class="note-long" id="{{ item.slug }}">
+      <h2 class="block-h">{{ item.title | lower }}</h2>
+      {% if item.summary_html %}<div class="prose lead">{{ item.summary_html | safe }}</div>{% endif %}
+      {% if item.body_html %}<div class="prose">{{ item.body_html | safe }}</div>{% endif %}
+    </section>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

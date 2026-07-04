@@ -38,7 +38,24 @@ acadsite new      --site mysite                       # scaffold a starter site
 acadsite validate --site examples/basic-site          # check config + content
 acadsite build    --site examples/basic-site --output public
 acadsite build    --site . --output public --env github-pages
+acadsite build    --site . --config site.theme2.json --output public2   # alternate theme
 ```
+
+Use `--config <file>` to point at an alternate config in the same site
+directory — handy for shipping the **same content in multiple themes** (e.g. a
+second config that sets `"preset": "minimal"` and shares the `content/` files).
+
+## Presets
+
+- **`academic`** — professional cards, timelines, and publication lists with a
+  blue accent; the default.
+- **`minimal`** — a personal, single-column, essay-like theme (warm paper,
+  serif display type, monospace meta) for a site that reads like a personal
+  page rather than a resume template.
+
+A preset ships its own `templates/` (it may override `base.html.j2`),
+`static/` assets, and optional `schemas/`. Switch presets with the `preset`
+key in config; the engine and content model are identical across presets.
 
 Try the bundled demo:
 

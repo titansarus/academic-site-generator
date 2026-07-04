@@ -169,16 +169,27 @@ class Site:
         return domain or None
 
 
-def load_site(site_dir: str | Path, env: str | None = None) -> Site:
+def load_site(
+    site_dir: str | Path, env: str | None = None, config_filename: str | None = None
+) -> Site:
     """Load and fully resolve a site configuration.
 
     Resolution order (deep-merged, later wins):
     1. preset defaults (``presets/<name>/preset.json`` ``defaults`` block)
     2. the site config file
     3. ``environments[env]`` overlay from the merged config, if requested
+
+    ``config_filename`` selects an alternate config file inside ``site_dir``
+    (e.g. a second theme that shares the same content), instead of the
+    auto-detected ``site.config.json``.
     """
     site_dir = Path(site_dir).resolve()
-    config_path = find_config_file(site_dir)
+    if config_filename:
+        config_path = site_dir / config_filename
+        if not config_path.exists():
+            raise ConfigError(f"Config file not found: {config_path}")
+    else:
+        config_path = find_config_file(site_dir)
     raw = _load_structured(config_path)
     if not isinstance(raw, dict):
         raise ConfigError(f"Config {config_path} must be a mapping at the top level.")

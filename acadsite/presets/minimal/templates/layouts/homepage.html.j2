@@ -1,0 +1,56 @@
+{% extends "base.html.j2" %}
+{% from "components/entries.html.j2" import render_list %}
+{% from "components/social_icon.html.j2" import social_icon %}
+{% block content %}
+{% for section in sections %}
+
+  {% if section.type == 'hero' %}
+  {% set p = section.profile %}
+  <section class="intro">
+    {% if p.photo %}<img class="avatar" src="{{ p.photo | media_url }}" alt="{{ p.name }}">{% endif %}
+    <h1 class="hello">Hi, I'm {{ p.name | default(site.title) }}. <span class="wave">👋</span></h1>
+    {% if p.tagline %}<p class="sub">{{ p.tagline }}{% if p.affiliation %} at {{ p.affiliation }}{% endif %}.</p>{% endif %}
+    {% if p.about_html %}<div class="intro-prose prose">{{ p.about_html | safe }}</div>{% endif %}
+    {% if p.now %}<p class="aside"><span class="aside-label">now</span> {{ p.now }}</p>{% endif %}
+    <p class="elsewhere">
+      {% if site.cv %}<a href="{{ site.cv | media_url }}" rel="noopener">cv</a>{% endif %}
+      {% for link in p.links | default([]) %}
+      <a href="{{ link.url | media_url }}"{% if link.icon != 'email' %} rel="noopener" target="_blank"{% endif %}>{{ social_icon(link.icon | default(link.label)) }}<span>{{ link.label | lower }}</span></a>
+      {% endfor %}
+    </p>
+    {% if p.research_interests %}<p class="aside"><span class="aside-label">into</span> {{ p.research_interests | join(' · ') | lower }}</p>{% endif %}
+  </section>
+
+  {% elif section.type == 'collection_preview' %}
+    {% if section.get('collection') %}
+    {% set col = section.collection %}
+    <section class="block" id="{{ col.slug }}">
+      <h2 class="block-h">{{ (section.title | default(col.label)) | lower }}</h2>
+      {% if col.type == 'timeline' %}
+        {% set lim = section.limit | default(section.all_items | length) %}
+        {{ render_list(col, section.all_items[:lim], true) }}
+      {% else %}
+        {{ render_list(col, section['items'], true) }}
+      {% endif %}
+      {% if section.link_to_full_page and section.full_url %}
+      <a class="more" href="{{ section.full_url }}">all {{ (section.title | default(col.label)) | lower }} →</a>
+      {% endif %}
+    </section>
+    {% endif %}
+
+  {% elif section.type == 'news' %}
+  <section class="block" id="news">
+    <h2 class="block-h">{{ section.title | default('news') | lower }}</h2>
+    <ul class="list newsl">
+      {% for item in section['items'] %}
+      <li><span class="line-when">{{ item.date }}</span> {% if item.href %}<a href="{{ item.href | media_url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% elif section.type == 'markdown' %}
+  <section class="block prose">{{ section.html | safe }}</section>
+  {% endif %}
+
+{% endfor %}
+{% endblock %}

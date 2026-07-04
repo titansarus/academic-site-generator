@@ -1,0 +1,9 @@
+{
+  "name": "minimal",
+  "description": "A personal, single-column, essay-like theme. Warm paper palette, characterful serif display type, monospace meta. Understated and conversational rather than corporate -- for people who want their site to read like a personal page, not a resume template.",
+  "version": "0.1.0",
+  "defaults": {
+    "site": { "lang": "en" },
+    "theme": { "default": "system" }
+  }
+}

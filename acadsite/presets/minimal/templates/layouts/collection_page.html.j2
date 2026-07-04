@@ -1,0 +1,23 @@
+{% extends "base.html.j2" %}
+{% from "components/entries.html.j2" import render_list %}
+{% block content %}
+<section class="page">
+  <h1 class="page-h">{{ page.title | lower }}</h1>
+  {% if body_html %}<div class="prose lead">{{ body_html | safe }}</div>{% endif %}
+  {% for collection in collections %}
+  <div class="block" id="{{ collection.slug }}">
+    {% if collections | length > 1 %}<h2 class="block-h">{{ collection.label | lower }}</h2>{% endif %}
+    {% if collection.groups %}
+      {% for group in collection.groups %}
+      <h3 class="group-h">{{ group.category | lower }}</h3>
+      {{ render_list(collection, group['items'], false) }}
+      {% endfor %}
+    {% elif collection['items'] %}
+      {{ render_list(collection, collection['items'], false) }}
+    {% else %}
+      <p class="muted">nothing here yet.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

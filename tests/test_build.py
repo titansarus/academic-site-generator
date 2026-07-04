@@ -71,6 +71,66 @@ def test_cname_written_when_custom_domain(tmp_path):
     assert (out / "CNAME").read_text(encoding="utf-8").strip() == "example.org"
 
 
+def _write_min_site(tmp_path, preset, config_name="site.config.json"):
+    import json
+
+    site_dir = tmp_path / "site"
+    (site_dir / "content").mkdir(parents=True, exist_ok=True)
+    (site_dir / "content" / "profile.json").write_text(
+        json.dumps({"name": "Ada L.", "tagline": "engineer", "about": "Hello."}),
+        encoding="utf-8",
+    )
+    (site_dir / "content" / "pubs.json").write_text(
+        json.dumps([{"title": "A Paper", "authors": "Ada L.", "year": 2025}]),
+        encoding="utf-8",
+    )
+    config = {
+        "preset": preset,
+        "site": {"title": "Ada L.", "base_path": "/"},
+        "collections": {"publications": {"slug": "publications", "source": "content/pubs.json", "type": "publication-list"}},
+        "homepage": {"sections": [
+            {"type": "hero", "source": "content/profile.json"},
+            {"type": "collection_preview", "collection": "publications", "limit": 3},
+        ]},
+        "pages": [{"title": "Publications", "slug": "publications", "layout": "collection_page", "collections": ["publications"]}],
+    }
+    (site_dir / config_name).write_text(json.dumps(config), encoding="utf-8")
+    return site_dir
+
+
+def test_minimal_preset_build(tmp_path):
+    """The 'minimal' preset builds and produces its own distinct chrome."""
+    from acadsite.config import load_site
+
+    site_dir = _write_min_site(tmp_path, preset="minimal")
+    out = tmp_path / "public"
+    build_site(load_site(site_dir), out)
+    index = (out / "index.html").read_text(encoding="utf-8")
+    assert "Hi, I'm Ada L." in index
+    # Uses the minimal stylesheet, not the academic one.
+    assert (out / "assets" / "css" / "minimal.css").exists()
+    assert not (out / "assets" / "css" / "academic.css").exists()
+    assert "minimal.css" in index and "academic.css" not in index
+
+
+def test_alternate_config_filename(tmp_path):
+    """A second config file in the same site dir can select another theme."""
+    from acadsite.config import load_site
+
+    site_dir = _write_min_site(tmp_path, preset="academic")  # default site.config.json
+    # Add a second config using the minimal preset.
+    import json
+
+    alt = dict(json.loads((site_dir / "site.config.json").read_text(encoding="utf-8")))
+    alt["preset"] = "minimal"
+    (site_dir / "site.theme2.json").write_text(json.dumps(alt), encoding="utf-8")
+
+    default_site = load_site(site_dir)
+    alt_site = load_site(site_dir, config_filename="site.theme2.json")
+    assert default_site.preset_name == "academic"
+    assert alt_site.preset_name == "minimal"
+
+
 def test_no_hardcoded_page_renderers():
     """Guardrail: the engine must not define per-topic render functions."""
     import inspect

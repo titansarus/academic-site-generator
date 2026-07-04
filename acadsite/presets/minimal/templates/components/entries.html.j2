@@ -1,0 +1,77 @@
+{# Entry macros for the minimal theme. Text-forward, single column, no cards. #}
+
+{% macro _primary(item) %}{% if item.url %}{{ item.url }}{% elif item.links %}{{ item.links[0].url | media_url }}{% elif item.doi %}https://doi.org/{{ item.doi }}{% else %}{% endif %}{% endmacro %}
+
+{% macro entry_links(item) %}
+{% set has = item.links or item.doi or item.github or (item.bibtex is defined and item.include_bibtex | default(true)) %}
+{% if has %}
+<div class="entry-links">
+  {% for link in item.links %}<a href="{{ link.url | media_url }}" rel="noopener">{{ link.label | lower }} ↗</a>{% endfor %}
+  {% if item.doi %}<a href="https://doi.org/{{ item.doi }}" rel="noopener">doi ↗</a>{% endif %}
+  {% if item.github %}<a href="{{ item.github | media_url }}" rel="noopener">github ↗</a>{% endif %}
+  {% if item.bibtex and item.include_bibtex | default(true) %}<button type="button" class="linkish" data-bibtex-toggle aria-expanded="false">bibtex</button>{% endif %}
+</div>
+{% if item.bibtex and item.include_bibtex | default(true) %}<pre class="bib" data-bibtex hidden><code>{{ bibtex(item) }}</code></pre>{% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro tech_line(techs) %}
+{% if techs %}
+<div class="tech">{% for t in techs %}{% set ic = tech_icon(t) %}<span class="tech-item">{% if ic %}<img src="{{ ic }}" alt="" aria-hidden="true">{% endif %}{{ t }}</span>{% endfor %}</div>
+{% endif %}
+{% endmacro %}
+
+{% macro pub_entry(item) %}
+{% set href = _primary(item) | trim %}
+<li class="pub">
+  <p class="pub-title">{% if href %}<a href="{{ href }}" rel="noopener">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}</p>
+  {% if item.authors %}<p class="pub-authors">{{ item.authors }}</p>{% endif %}
+  {% if item.venue or item.year %}<p class="pub-venue"><em>{{ item.venue }}</em>{% if item.venue and item.year %}, {% endif %}{{ item.year }}</p>{% endif %}
+  {{ entry_links(item) }}
+</li>
+{% endmacro %}
+
+{% macro line_entry(item, compact=false) %}
+<li class="line">
+  <div class="line-top">
+    <span class="line-what">{% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}{% if item.org %} <span class="line-where">· {{ item.org }}</span>{% endif %}</span>
+    {% if item.display_date %}<span class="line-when">{{ item.display_date }}</span>{% endif %}
+  </div>
+  {% if item.location %}<div class="line-loc">{{ item.location }}</div>{% endif %}
+  {% if item.summary_html %}<div class="line-note">{{ item.summary_html | safe }}</div>{% endif %}
+  {% if item.body_html and not compact %}<div class="line-detail">{{ item.body_html | safe }}</div>{% endif %}
+</li>
+{% endmacro %}
+
+{% macro project_entry(item) %}
+{% set href = _primary(item) | trim %}
+<li class="proj">
+  <div class="line-top">
+    <span class="proj-name">{% if href %}<a href="{{ href }}" rel="noopener">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}</span>
+    {% if item.display_date %}<span class="line-when">{{ item.display_date }}</span>{% endif %}
+  </div>
+  {% if item.summary_html %}<div class="proj-note">{{ item.summary_html | safe }}</div>{% endif %}
+  {{ tech_line(item.technologies | default(item.tags)) }}
+  {{ entry_links(item) }}
+</li>
+{% endmacro %}
+
+{% macro md_entry(item) %}
+<li class="note">
+  <a class="note-title" href="{{ item.url | default('#') }}">{{ item.title }}</a>
+  {% if item.summary_html %}<span class="note-sum"> — {{ item.summary_html | safe }}</span>{% endif %}
+</li>
+{% endmacro %}
+
+{% macro render_list(collection, items, compact=false) %}
+{% set type = collection.type %}
+{% if type == 'publication-list' %}
+  <ol class="list pubs">{% for item in items %}{{ pub_entry(item) }}{% endfor %}</ol>
+{% elif type in ['cards', 'grid'] %}
+  <ul class="list projs">{% for item in items %}{{ project_entry(item) }}{% endfor %}</ul>
+{% elif type == 'markdown-sections' %}
+  <ul class="list notes">{% for item in items %}{{ md_entry(item) }}{% endfor %}</ul>
+{% else %}
+  <ul class="list lines">{% for item in items %}{{ line_entry(item, compact) }}{% endfor %}</ul>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,14 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<article class="page detail">
+  <a class="back" href="{{ url(collection.slug) }}">← {{ collection.label | lower }}</a>
+  <h1 class="detail-h">{{ item.title }}</h1>
+  <p class="detail-meta">{% if item.display_date %}{{ item.display_date }}{% endif %}{% if item.category %} · {{ item.category }}{% endif %}</p>
+  {% if item.image %}<img class="detail-img" src="{{ item.image | media_url }}" alt="{{ item.title }}">{% endif %}
+  {% if item.summary_html %}<div class="prose lead">{{ item.summary_html | safe }}</div>{% endif %}
+  {% if item.links %}
+  <p class="elsewhere">{% for link in item.links %}<a href="{{ link.url | media_url }}" rel="noopener">{{ link.label | lower }} ↗</a>{% endfor %}</p>
+  {% endif %}
+  {% if item.body_html %}<div class="prose">{{ item.body_html | safe }}</div>{% endif %}
+</article>
+{% endblock %}
