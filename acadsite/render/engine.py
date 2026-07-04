@@ -121,17 +121,29 @@ class Engine:
     def _render_to(self, template_name: str, rel_url: str, context: dict, output_root: Path) -> None:
         template = self.env.get_template(template_name)
         html = template.render(**context)
-        out_path = UrlBuilder.output_path(output_root, rel_url)
+        out_path = UrlBuilder.output_path(output_root, self._file_rel(rel_url))
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(html, encoding="utf-8")
         self.result.add_page(rel_url)
+
+    def _file_rel(self, rel_url: str) -> str:
+        """Strip the site base_path so files land at the artifact root.
+
+        In-page URLs keep the base_path (the browser resolves them from the
+        domain root), but on GitHub Pages the artifact itself is *served* under
+        the base_path, so the file tree must be relative to it.
+        """
+        base = self.urls.base_path
+        if base != "/" and rel_url.startswith(base):
+            return "/" + rel_url[len(base):]
+        return rel_url
 
     # -- homepage --------------------------------------------------------
     def render_homepage(self, output_root: Path) -> None:
         sections = [self._resolve_section(s) for s in self.site.homepage.get("sections", [])]
         context = self.base_context("")
         context.update({"page": {"title": self.site.title, "slug": ""}, "sections": sections})
-        self._render_to("layouts/homepage.html.j2", "/", context, output_root)
+        self._render_to("layouts/homepage.html.j2", self.urls.url(), context, output_root)
 
     def _resolve_section(self, section: dict) -> dict:
         stype = section.get("type")
@@ -203,7 +215,7 @@ class Engine:
     def render_page(self, page: PageConfig, output_root: Path) -> None:
         cols = [self.collections[k] for k in page.collections if k in self.collections]
         context = self.base_context(page.slug)
-        rel_url = self.urls.url(page.slug) if page.slug else "/"
+        rel_url = self.urls.url(page.slug) if page.slug else self.urls.url()
 
         body_html = ""
         if page.body:

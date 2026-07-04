@@ -37,8 +37,38 @@ def test_github_pages_build(tmp_path, example_site_dir):
     index = (out / "index.html").read_text(encoding="utf-8")
     # base_path applied to internal links
     assert "/demo-site/" in index
+    # ...but the file tree is relative to base_path (no double prefix on Pages)
+    assert (out / "projects" / "index.html").exists()
+    assert not (out / "demo-site").exists()
+    # sitemap uses absolute URLs including the base_path
+    sitemap = (out / "sitemap.xml").read_text(encoding="utf-8")
+    assert "https://example.github.io/demo-site/" in sitemap
     # custom_domain disabled -> no CNAME
     assert not (out / "CNAME").exists()
+
+
+def test_cname_written_when_custom_domain(tmp_path):
+    import json
+
+    site_dir = tmp_path / "site"
+    (site_dir / "content").mkdir(parents=True)
+    (site_dir / "content" / "n.json").write_text(
+        json.dumps([{"title": "Hi"}]), encoding="utf-8"
+    )
+    config = {
+        "preset": "academic",
+        "site": {"title": "T", "base_path": "/", "custom_domain": "example.org"},
+        "collections": {"n": {"slug": "n", "source": "content/n.json"}},
+        "homepage": {"sections": []},
+        "pages": [{"title": "N", "slug": "n", "layout": "collection_page", "collections": ["n"]}],
+    }
+    (site_dir / "site.config.json").write_text(json.dumps(config), encoding="utf-8")
+    from acadsite.config import load_site
+
+    site = load_site(site_dir)
+    out = tmp_path / "public"
+    build_site(site, out)
+    assert (out / "CNAME").read_text(encoding="utf-8").strip() == "example.org"
 
 
 def test_no_hardcoded_page_renderers():
