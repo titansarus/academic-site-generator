@@ -1,0 +1,33 @@
+{# Optional academic-preset layout for comparing the two reusable project
+   components. Sites select it through page configuration; no site-level
+   template fork is required. #}
+{% extends "base.html.j2" %}
+{% from "components/project_card.html.j2" import project_card %}
+{% from "components/project_list_item.html.j2" import project_list_item %}
+{% block content %}
+{% set projects = collections[0] %}
+<div class="section">
+  <div class="container">
+    <h1 class="page-title">{{ page.title }}</h1>
+    {% if body_html %}<div class="prose page-intro">{{ body_html | safe }}</div>{% endif %}
+
+    <section class="project-design" id="projects-list">
+      <p class="eyebrow">Design A</p>
+      <h2 class="heading">List view</h2>
+      <p class="design-note">A compact horizontal list, like the timeline sections, with no image placeholders.</p>
+      <div class="project-list">
+        {% for item in projects['items'] %}{{ project_list_item(item) }}{% endfor %}
+      </div>
+    </section>
+
+    <section class="project-design" id="projects-cards">
+      <p class="eyebrow">Design B</p>
+      <h2 class="heading">Card view</h2>
+      <p class="design-note">Cards with an accent bar so projects without images still look intentional.</p>
+      <div class="card-grid">
+        {% for item in projects['items'] %}{{ project_card(item) }}{% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

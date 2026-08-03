@@ -131,6 +131,18 @@ def test_alternate_config_filename(tmp_path):
     assert alt_site.preset_name == "minimal"
 
 
+def test_academic_project_showcase_is_packaged(example_site_dir, tmp_path):
+    """The comparison layout is preset-owned, not copied into a consuming site."""
+    site = load_site(example_site_dir)
+    projects_page = next(page for page in site.pages if page.slug == "projects")
+    projects_page.layout = "projects_showcase"
+    out = tmp_path / "public"
+    build_site(site, out)
+    html = (out / "projects" / "index.html").read_text(encoding="utf-8")
+    assert "Design A" in html
+    assert "Design B" in html
+
+
 def test_no_hardcoded_page_renderers():
     """Guardrail: the engine must not define per-topic render functions."""
     import inspect

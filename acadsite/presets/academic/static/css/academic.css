@@ -30,7 +30,7 @@
   --color-text: #e5e7eb;
   --color-text-muted: #94a3b8;
   --color-border: #334155;
-  --color-accent: #3b82f6;
+  --color-accent: #60a5fa;
   --color-accent-soft: #1e3a5f;
   --color-accent-contrast: #ffffff;
 }
@@ -112,7 +112,7 @@ button { font-family: inherit; cursor: pointer; }
 .hero-photo { width: 132px; height: 132px; border-radius: 16px; overflow: hidden; background: var(--color-surface-muted); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; }
 .hero-photo img { width: 100%; height: 100%; object-fit: cover; }
 .hero-photo-fallback span { font-family: var(--font-mono); font-size: 44px; color: var(--color-text-muted); }
-.hero-name { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; margin: 18px 0 6px; }
+.hero-name { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin: 18px 0 6px; }
 .hero-title { font-size: 17px; font-weight: 500; margin: 0 0 3px; }
 .hero-affil { font-size: 14.5px; color: var(--color-accent); font-family: var(--font-mono); margin: 0 0 16px; }
 .hero-lead { font-size: 15.5px; line-height: 1.7; color: var(--color-text-muted); margin: 0 0 22px; }
@@ -151,6 +151,7 @@ button { font-family: inherit; cursor: pointer; }
 .pub-item { padding: 22px 0; border-bottom: 1px solid var(--color-border); }
 .pub-title { font-size: 16.5px; font-weight: 600; line-height: 1.5; margin: 0 0 6px; }
 .pub-title a:hover { color: var(--color-accent); }
+.pub-list .pub-item:first-child { padding-top: 8px; }
 .pub-authors { font-size: 14.5px; color: var(--color-text-muted); margin: 0 0 8px; }
 .pub-venue { font-family: var(--font-mono); font-size: 12.5px; color: var(--color-accent); margin: 0 0 4px; }
 .pub-summary { font-size: 14.5px; color: var(--color-text-muted); margin: 6px 0 0; }
@@ -174,6 +175,7 @@ button { font-family: inherit; cursor: pointer; }
 /* Project card (Design B): no empty image box when there is no image; a slim
    accent bar gives the card presence instead of a blank thumbnail. */
 .project-card-flat { border-top: 3px solid var(--color-accent); }
+.project-card:hover { box-shadow: 0 6px 20px rgba(37, 99, 235, 0.10); }
 .project-card .card-body { padding-top: 16px; }
 .project-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
 .project-card-head .card-title { margin: 0; }
@@ -185,6 +187,8 @@ button { font-family: inherit; cursor: pointer; }
 .project-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .project-row-title { font-size: 16px; font-weight: 600; margin: 0; }
 .project-row-title a:hover { color: var(--color-accent); }
+.project-design + .project-design { margin-top: 52px; padding-top: 40px; border-top: 1px solid var(--color-border); }
+.design-note { font-size: 14px; color: var(--color-text-muted); margin: 0 0 18px; max-width: 60ch; }
 .project-row-date { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
 .project-row-summary { font-size: 14.5px; line-height: 1.6; color: var(--color-text-muted); margin: 8px 0 0; }
 .project-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
