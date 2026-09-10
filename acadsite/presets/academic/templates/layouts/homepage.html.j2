@@ -5,6 +5,7 @@
 {% from "components/personal_card.html.j2" import personal_card %}
 {% from "components/news_item.html.j2" import news_item %}
 {% from "components/social_icon.html.j2" import social_icon %}
+{% from "components/education_item.html.j2" import education_item %}
 
 {% macro preview(section) %}
   {% set col = section.collection %}
@@ -22,6 +23,31 @@
 
       {% elif type == 'markdown-sections' %}
         <div class="personal-grid">{% for item in section['items'] %}{{ personal_card(item) }}{% endfor %}</div>
+
+      {% elif type == 'timeline' and section.mode == 'grouped_accordion' %}
+        <div class="accordion-list">
+          {% for group in section.preview_groups %}
+          <details class="accordion-group"{% if group.expanded %} open{% endif %}>
+            <summary class="accordion-summary">
+              <span class="accordion-identity">
+                {% if features.get('organization_logos', true) and group.logo %}
+                <span class="accordion-logo"><img src="{{ group.logo | media_url }}" alt=""></span>
+                {% elif features.get('organization_logos', true) and group.logo_initials %}
+                <span class="accordion-logo accordion-logo-text" aria-hidden="true">{{ group.logo_initials }}</span>
+                {% endif %}
+                <span>
+                  <strong>{{ group.label }}</strong>
+                  {% if group.description %}<small>{{ group.description }}</small>{% endif %}
+                </span>
+              </span>
+              <span class="accordion-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="accordion-content timeline">
+              {% for item in group['items'] %}{{ timeline_item(item) }}{% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
 
       {% elif type == 'timeline' %}
         {% set limit = section.limit | default(section['items'] | length) %}
@@ -51,13 +77,14 @@
 {% endmacro %}
 
 {% block content %}
-{% for section in sections %}
-
-  {% if section.type == 'hero' %}
-  {% set p = section.profile %}
-  <section class="hero-section">
+{% set hero_sections = sections | selectattr('type', 'equalto', 'hero') | list %}
+{% set hero = hero_sections | first %}
+{% if hero %}{% set p = hero.profile %}{% endif %}
+<div class="home-shell">
+  {% if hero %}
+  <section class="hero-section home-intro">
     <div class="container hero-grid">
-      <div class="hero-col">
+      <aside class="hero-col home-profile" aria-label="Profile">
         {% if p.photo %}
         <div class="hero-photo"><img src="{{ p.photo | media_url }}" alt="{{ p.name }}"></div>
         {% else %}
@@ -66,7 +93,6 @@
         <h1 class="hero-name">{{ p.name | default(site.title) }}</h1>
         {% if p.tagline %}<p class="hero-title">{{ p.tagline }}</p>{% endif %}
         {% if p.affiliation %}<p class="hero-affil">{{ p.affiliation }}</p>{% endif %}
-        {% if p.lead %}<p class="hero-lead">{{ p.lead }}</p>{% endif %}
         <div class="chip-row">
           {% if site.cv %}<a class="btn btn-primary" href="{{ site.cv | media_url }}">View CV</a>{% endif %}
           {% for link in p.links | default([]) %}
@@ -76,7 +102,7 @@
           </a>
           {% endfor %}
         </div>
-      </div>
+      </aside>
       <div class="hero-info">
         {% if p.about_html %}
         <div><p class="eyebrow">About</p><div class="prose hero-about">{{ p.about_html | safe }}</div></div>
@@ -87,11 +113,21 @@
           <ul class="pill-list" role="list">{% for t in p.research_interests %}<li class="pill">{{ t }}</li>{% endfor %}</ul>
         </div>
         {% endif %}
+        {% if hero.collection_items %}
+        <div>
+          <p class="eyebrow">Education</p>
+          <div class="education-list">{% for item in hero.collection_items %}{{ education_item(item) }}{% endfor %}</div>
+        </div>
+        {% endif %}
       </div>
     </div>
   </section>
+  {% endif %}
 
-  {% elif section.type == 'news' %}
+  <div class="home-rest">
+  {% for section in sections if section.type != 'hero' %}
+
+  {% if section.type == 'news' %}
   <section class="section section-wide" id="news">
     <div class="container">
       <p class="eyebrow">Recent</p>
@@ -109,5 +145,7 @@
   </section>
   {% endif %}
 
-{% endfor %}
+  {% endfor %}
+  </div>
+</div>
 {% endblock %}

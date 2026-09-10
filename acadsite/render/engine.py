@@ -14,15 +14,23 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PackageLoader, select_autoescape
+from jinja2 import ChoiceLoader, PackageLoader, select_autoescape
+from jinja2.sandbox import SandboxedEnvironment
 
 from .. import presets
 from ..bibtex import generate_bibtex
 from ..config import PageConfig, Site
 from ..content import Collection, apply_filter, load_collection
 from ..markdown import render_inline, render_markdown
+from ..paths import resolve_within
 from .assets import copy_static_assets
-from .urls import UrlBuilder
+from .loaders import ContainedFileSystemLoader
+from .urls import UrlBuilder, validate_custom_domain
+
+
+def _xml_attr(value: object) -> str:
+    """Escape a value for a double-quoted XML attribute."""
+    return escape(str(value), {'"': "&quot;", "'": "&apos;"})
 
 
 class BuildResult:
@@ -34,6 +42,10 @@ class BuildResult:
 
     def add_page(self, rel_url: str) -> None:
         self.pages.append(rel_url)
+
+
+class UnsafeOutputError(ValueError):
+    """Raised before a clean build could remove a non-output directory."""
 
 
 class Engine:
@@ -48,11 +60,13 @@ class Engine:
         self.result = BuildResult()
 
     # -- environment -----------------------------------------------------
-    def _build_environment(self) -> Environment:
+    def _build_environment(self) -> SandboxedEnvironment:
         loaders = []
-        site_templates = self.site.root / "templates"
+        site_templates = resolve_within(
+            self.site.root, "templates", "Site templates directory"
+        )
         if site_templates.is_dir():
-            loaders.append(FileSystemLoader(str(site_templates)))
+            loaders.append(ContainedFileSystemLoader(str(site_templates)))
         preset_templates = presets.preset_templates_path(self.site.preset_name)
         if preset_templates and preset_templates.is_dir():
             loaders.append(
@@ -60,7 +74,7 @@ class Engine:
             )
         loaders.append(PackageLoader("acadsite", "templates/core"))
 
-        env = Environment(
+        env = SandboxedEnvironment(
             loader=ChoiceLoader(loaders),
             autoescape=select_autoescape(["html", "xml", "j2"]),
             trim_blocks=True,
@@ -75,6 +89,7 @@ class Engine:
         env.globals["bibtex"] = generate_bibtex
         env.globals["now_year"] = date.today().year
         env.globals["tech_icon"] = self._make_tech_icon()
+        env.globals["features"] = self.site.data.get("features", {})
         return env
 
     def _make_tech_icon(self):
@@ -98,8 +113,21 @@ class Engine:
         """Resolve a content-supplied media path to a usable URL."""
         if not path:
             return ""
-        text = str(path)
-        if text.startswith(("http://", "https://", "//", "mailto:", "data:")):
+        text = str(path).strip()
+        if any(ord(char) < 32 for char in text):
+            return "#"
+        lowered = text.lower()
+        if lowered.startswith(("http://", "https://", "mailto:", "tel:")):
+            return text
+        if text.startswith("//"):
+            return "https:" + text
+        if text.startswith(("#", "?")):
+            return text
+        # A colon before any slash denotes an unsupported URI scheme such as
+        # javascript: or data:. Neutralize it instead of emitting an active URL.
+        if ":" in text.split("/", 1)[0]:
+            return "#"
+        if text.startswith(self.urls.base_path):
             return text
         return self.urls.base_path + text.lstrip("/")
 
@@ -117,7 +145,11 @@ class Engine:
     def base_context(self, page_slug: str = "") -> dict:
         nav = []
         for entry in self.site.nav:
-            href = entry.get("href") or self.urls.url(entry.get("slug", ""))
+            href = (
+                self.media_url(entry["href"])
+                if entry.get("href")
+                else self.urls.url(entry.get("slug", ""))
+            )
             nav.append(
                 {
                     "label": entry["label"],
@@ -168,6 +200,13 @@ class Engine:
         resolved = dict(section)
         if stype == "hero":
             resolved["profile"] = self._load_profile(section.get("source"))
+            key = section.get("collection")
+            collection = self.collections.get(key) if key else None
+            resolved["collection_items"] = (
+                collection.items[: section.get("collection_limit")]
+                if collection and section.get("collection_limit")
+                else collection.items if collection else []
+            )
         elif stype == "collection_preview":
             key = section.get("collection")
             collection = self.collections.get(key)
@@ -179,6 +218,17 @@ class Engine:
             items = apply_filter(collection.items, section.get("filter"))
             limit = section.get("limit")
             preview_items = items[:limit] if limit else items
+            preview_groups = []
+            for group in section.get("preview_groups", []):
+                group_items = apply_filter(items, group.get("filter"))
+                group_limit = group.get("limit")
+                preview_groups.append(
+                    {
+                        **group,
+                        "items": group_items[:group_limit] if group_limit else group_items,
+                        "has_more": bool(group_limit) and len(group_items) > group_limit,
+                    }
+                )
             resolved.update(
                 {
                     "collection": collection,
@@ -186,6 +236,7 @@ class Engine:
                     "items": preview_items,
                     "all_items": items,
                     "groups": collection.groups,
+                    "preview_groups": preview_groups,
                     "full_url": self.urls.url(collection.slug),
                     "has_more": bool(limit) and len(items) > limit,
                 }
@@ -199,7 +250,7 @@ class Engine:
     def _load_profile(self, source: str | None) -> dict:
         if not source:
             return {}
-        path = self.site.root / source
+        path = resolve_within(self.site.root, source, "Profile source")
         if not path.exists():
             return {}
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -211,7 +262,7 @@ class Engine:
 
     def _load_markdown_section(self, section: dict) -> str:
         if section.get("body"):
-            path = self.site.root / section["body"]
+            path = resolve_within(self.site.root, section["body"], "Homepage Markdown body")
             if path.exists():
                 return render_markdown(path.read_text(encoding="utf-8"))
         if section.get("content"):
@@ -221,7 +272,7 @@ class Engine:
     def _load_list(self, source: str | None) -> list[dict]:
         if not source:
             return []
-        path = self.site.root / source
+        path = resolve_within(self.site.root, source, "Homepage list source")
         if not path.exists():
             return []
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -237,7 +288,9 @@ class Engine:
 
         body_html = ""
         if page.body:
-            body_path = self.site.root / page.body
+            body_path = resolve_within(
+                self.site.root, page.body, f"Page '{page.slug}' body"
+            )
             if body_path.exists():
                 body_html = render_markdown(body_path.read_text(encoding="utf-8"))
 
@@ -309,11 +362,14 @@ class Engine:
             return
         base = self.site.base_url or ""
         title = escape(feed_cfg.get("title", self.site.title))
-        self_url = escape(base + self.urls.asset("feed.xml"))
+        self_url = _xml_attr(base + self.urls.asset("feed.xml"))
         updated = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         entries = []
         for item in collection.items[: feed_cfg.get("limit", 20)]:
-            item_url = escape(base + (item.get("url") or self.urls.url(collection.slug, item["slug"])))
+            item_url = _xml_attr(
+                base
+                + (item.get("url") or self.urls.url(collection.slug, item["slug"]))
+            )
             summary = escape(item.get("summary", "") or "")
             entries.append(
                 "  <entry>\n"
@@ -339,14 +395,59 @@ class Engine:
     def write_cname(self, output_root: Path) -> None:
         domain = self.site.custom_domain
         if domain:
-            (output_root / "CNAME").write_text(domain + "\n", encoding="utf-8")
+            safe_domain = validate_custom_domain(domain)
+            (output_root / "CNAME").write_text(safe_domain + "\n", encoding="utf-8")
 
     # -- top-level build -------------------------------------------------
+    def _validate_clean_output(self, output_root: Path) -> None:
+        """Refuse broad/source deletion and unknown non-empty directories."""
+        anchor = Path(output_root.anchor).resolve()
+        protected = [self.site.root.resolve(), Path.cwd().resolve(), Path.home().resolve()]
+        if output_root == anchor or any(
+            output_root == path or output_root in path.parents for path in protected
+        ):
+            raise UnsafeOutputError(
+                f"Refusing to clean protected output path: {output_root}"
+            )
+
+        source_trees = [
+            self.site.root / name
+            for name in ("content", "markdown", "assets", "static", "templates", ".git", ".github")
+        ]
+        if any(output_root == tree.resolve() or tree.resolve() in output_root.parents for tree in source_trees):
+            raise UnsafeOutputError(
+                f"Refusing to clean output inside a site source directory: {output_root}"
+            )
+
+        if not output_root.exists() or not any(output_root.iterdir()):
+            return
+        marker = output_root / ".acadsite-output"
+        index = output_root / "index.html"
+        legacy_signature = False
+        if index.is_file():
+            try:
+                legacy_signature = 'name="acadsite-base-path"' in index.read_text(
+                    encoding="utf-8", errors="ignore"
+                )
+            except OSError:
+                legacy_signature = False
+        if not marker.is_file() and not legacy_signature:
+            raise UnsafeOutputError(
+                "Refusing to clean a non-empty directory that is not recognized as "
+                f"acadsite output: {output_root}"
+            )
+
     def build(self, output: str | Path, clean: bool = True) -> BuildResult:
         output_root = Path(output).resolve()
-        if clean and output_root.exists():
-            shutil.rmtree(output_root)
+        if clean:
+            self._validate_clean_output(output_root)
+            if output_root.exists():
+                shutil.rmtree(output_root)
         output_root.mkdir(parents=True, exist_ok=True)
+        (output_root / ".acadsite-output").write_text(
+            "Generated by acadsite. Safe to replace with a clean build.\n",
+            encoding="utf-8",
+        )
 
         self.load()
         self.render_homepage(output_root)

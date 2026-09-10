@@ -16,6 +16,11 @@ import shutil
 from pathlib import Path
 
 from .. import presets
+from ..paths import SitePathError, resolve_within
+
+
+class UnsafeAssetError(ValueError):
+    """Raised when an asset source or destination escapes its owning tree."""
 
 
 def _copy_tree(src: Path, dest: Path, warnings: list[str], verbose: bool) -> None:
@@ -23,11 +28,15 @@ def _copy_tree(src: Path, dest: Path, warnings: list[str], verbose: bool) -> Non
         if path.is_dir():
             continue
         rel = path.relative_to(src)
-        target = dest / rel
+        try:
+            safe_source = resolve_within(src, rel, "Static asset")
+            target = resolve_within(dest, rel, "Generated asset")
+        except SitePathError as exc:
+            raise UnsafeAssetError(str(exc)) from exc
         if target.exists() and verbose:
             warnings.append(f"asset override: {rel} (from {src})")
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, target)
+        shutil.copy2(safe_source, target)
 
 
 def copy_static_assets(
@@ -48,12 +57,18 @@ def copy_static_assets(
         sources.append(core_static)
     if preset_static and preset_static.is_dir():
         sources.append(preset_static)
-    site_static = site.root / "static"
-    if site_static.is_dir():
-        sources.append(site_static)
-    site_assets = site.root / "assets"
-    if site_assets.is_dir():
-        sources.append(site_assets)
+    for directory_name in ("static", "assets"):
+        raw_source = site.root / directory_name
+        if not raw_source.exists() and not raw_source.is_symlink():
+            continue
+        try:
+            site_source = resolve_within(
+                site.root, directory_name, f"Site {directory_name} directory"
+            )
+        except SitePathError as exc:
+            raise UnsafeAssetError(str(exc)) from exc
+        if site_source.is_dir():
+            sources.append(site_source)
 
     for src in sources:
         _copy_tree(src, assets_out, warnings, verbose)

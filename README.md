@@ -41,9 +41,18 @@ acadsite build    --site . --output public --env github-pages
 acadsite build    --site . --config site.theme2.json --output public2   # alternate theme
 ```
 
+Newly scaffolded sites include `features.yml`, with global, homepage-only, and
+standalone-page switches ready to edit.
+
 Use `--config <file>` to point at an alternate config in the same site
 directory — handy for shipping the **same content in multiple themes** (e.g. a
 second config that sets `"preset": "minimal"` and shares the `content/` files).
+
+Generated themes include progressive partial navigation. Navbar clicks fetch a
+complete destination page but replace only its `<main>` region, synchronize the
+document title and active navigation state, and use browser history normally.
+Direct requests remain ordinary static HTML, and failed fetches fall back to a
+full navigation.
 
 ## Presets
 
@@ -148,6 +157,35 @@ Templates resolve through a `ChoiceLoader` chain (first match wins):
 So a site can override one component (e.g. `templates/components/project_card.html.j2`)
 without copying the whole theme. Static assets copy in precedence order
 (core → preset → site `static/` → site `assets/`) into `public/assets/`.
+
+## Feature flags
+
+A site can keep section content on disk while disabling all of its generated
+surfaces with a shared YAML file:
+
+```json
+{ "features_file": "features.yml" }
+```
+
+```yaml
+blog: false
+projects: true
+homepage:
+  personal_sections: false
+pages:
+  personal_sections: true
+```
+
+A disabled collection is omitted from navigation, homepage collection
+previews, list/detail pages, and feeds. Collections, pages, and homepage
+sections also accept a local `enabled: false` or an explicit `feature` key.
+Nested `homepage` and `pages` mappings control those surfaces independently;
+top-level flags are global master switches.
+
+Presentation features can use the same mapping without changing the collection
+model. The academic preset recognizes `organization_logos: false` to suppress
+organization and university logo output while leaving logo fields and assets
+available for later use.
 
 ## GitHub Pages
 

@@ -1,5 +1,6 @@
 from acadsite.config import load_site
-from acadsite.render.engine import build_site
+from acadsite.render.engine import UnsafeOutputError, build_site
+from acadsite.render.urls import UnsafeUrlError, UrlBuilder
 
 
 def test_full_build(tmp_path, example_site_dir):
@@ -12,6 +13,7 @@ def test_full_build(tmp_path, example_site_dir):
     assert (out / "404.html").exists()
     assert (out / "sitemap.xml").exists()
     assert (out / "feed.xml").exists()  # feed enabled in demo config
+    assert (out / ".acadsite-output").exists()
 
     # Collection page and a detail page
     assert (out / "publications" / "index.html").exists()
@@ -21,12 +23,32 @@ def test_full_build(tmp_path, example_site_dir):
 
     # Static assets copied
     assert (out / "assets" / "css" / "academic.css").exists()
+    assert (out / "assets" / "js" / "navigation.js").exists()
     assert (out / "assets" / "js" / "theme-toggle.js").exists()
 
     # Homepage content
     index = (out / "index.html").read_text(encoding="utf-8")
     assert "Jordan Rivera" in index
     assert "Selected Publications" in index
+    assert "data-layout-toggle" not in index
+    assert "home-profile" in index
+    assert "home-rest" in index
+    assert "theme-icon-sun" in index and "theme-icon-moon" in index
+    header = index.split("</header>", 1)[0]
+    assert "View CV" not in header
+    navigation_js = (out / "assets" / "js" / "navigation.js").read_text(encoding="utf-8")
+    academic_js = (out / "assets" / "js" / "academic.js").read_text(encoding="utf-8")
+    academic_css = (out / "assets" / "css" / "academic.css").read_text(encoding="utf-8")
+    assert "animatePanel" in academic_js
+    assert "fetchPage" in navigation_js
+    assert "main.innerHTML = nextMain.innerHTML" in navigation_js
+    assert "Page request left this site" in navigation_js
+    assert "Destination is not an acadsite page" in navigation_js
+    assert "history.pushState" in navigation_js
+    assert "window.location.assign(destination.href)" in navigation_js
+    assert "page-content-in" in academic_css
+    assert "data-transition-state" in academic_css
+    assert "prefers-reduced-motion" in academic_css
     assert result.pages
 
 
@@ -111,6 +133,28 @@ def test_minimal_preset_build(tmp_path):
     assert (out / "assets" / "css" / "minimal.css").exists()
     assert not (out / "assets" / "css" / "academic.css").exists()
     assert "minimal.css" in index and "academic.css" not in index
+    minimal_js = (out / "assets" / "js" / "minimal.js").read_text(encoding="utf-8")
+    navigation_js = (out / "assets" / "js" / "navigation.js").read_text(encoding="utf-8")
+    minimal_css = (out / "assets" / "css" / "minimal.css").read_text(encoding="utf-8")
+    assert "animatePanel" in minimal_js
+    assert "fetchPage" in navigation_js
+    assert "page-content-in" in minimal_css
+    assert "data-transition-state" in minimal_css
+    assert "prefers-reduced-motion" in minimal_css
+
+
+def test_organization_logos_can_be_hidden_without_removing_data(example_site_dir, tmp_path):
+    """A visual feature flag hides logos while content keeps logo fields."""
+    import json
+
+    site = load_site(example_site_dir)
+    site.data["features"]["organization_logos"] = False
+    out = tmp_path / "public"
+    build_site(site, out)
+    experience = (out / "experience" / "index.html").read_text(encoding="utf-8")
+    assert "exp-logo" not in experience
+    raw_items = json.loads((site.root / site.collections["experience"].source).read_text(encoding="utf-8"))
+    assert raw_items[0].get("logo_initials")
 
 
 def test_alternate_config_filename(tmp_path):
@@ -143,6 +187,26 @@ def test_academic_project_showcase_is_packaged(example_site_dir, tmp_path):
     assert "Design B" in html
 
 
+def test_homepage_resolves_hero_collection_and_preview_groups(example_site_dir):
+    site = load_site(example_site_dir)
+    engine = __import__("acadsite.render.engine", fromlist=["Engine"]).Engine(site)
+    engine.load()
+    hero = engine._resolve_section(
+        {"type": "hero", "source": "content/profile.json", "collection": "experience", "collection_limit": 1}
+    )
+    assert len(hero["collection_items"]) == 1
+
+    grouped = engine._resolve_section(
+        {
+            "type": "collection_preview",
+            "collection": "experience",
+            "preview_groups": [{"label": "Research", "filter": {"category": "Research"}, "limit": 1}],
+        }
+    )
+    assert grouped["preview_groups"][0]["label"] == "Research"
+    assert len(grouped["preview_groups"][0]["items"]) <= 1
+
+
 def test_no_hardcoded_page_renderers():
     """Guardrail: the engine must not define per-topic render functions."""
     import inspect
@@ -152,3 +216,112 @@ def test_no_hardcoded_page_renderers():
     source = inspect.getsource(engine)
     for banned in ("render_experience_page", "render_projects_page", "render_personal_page"):
         assert f"def {banned}" not in source
+
+
+def test_clean_build_refuses_site_root_and_unknown_nonempty_directory(tmp_path):
+    import pytest
+
+    site_dir = _write_min_site(tmp_path, preset="academic")
+    site = load_site(site_dir)
+    with pytest.raises(UnsafeOutputError, match="protected output path"):
+        build_site(site, site_dir)
+    assert (site_dir / "site.config.json").exists()
+
+    unrelated = tmp_path / "unrelated"
+    unrelated.mkdir()
+    sentinel = unrelated / "keep.txt"
+    sentinel.write_text("keep", encoding="utf-8")
+    with pytest.raises(UnsafeOutputError, match="not recognized"):
+        build_site(site, unrelated)
+    assert sentinel.read_text(encoding="utf-8") == "keep"
+
+
+def test_clean_build_can_replace_its_own_marked_output(tmp_path):
+    site_dir = _write_min_site(tmp_path, preset="academic")
+    site = load_site(site_dir)
+    out = tmp_path / "public"
+    build_site(site, out)
+    stale = out / "stale.txt"
+    stale.write_text("old", encoding="utf-8")
+    build_site(site, out)
+    assert not stale.exists()
+    assert (out / ".acadsite-output").exists()
+
+
+def test_route_traversal_cannot_write_outside_output(tmp_path):
+    import pytest
+
+    site_dir = _write_min_site(tmp_path, preset="academic")
+    site = load_site(site_dir)
+    site.pages[0].slug = "../../escaped"
+    out = tmp_path / "public"
+    with pytest.raises(UnsafeUrlError, match="traversal"):
+        build_site(site, out)
+    assert not (tmp_path / "escaped" / "index.html").exists()
+
+    with pytest.raises(UnsafeUrlError, match="escapes"):
+        UrlBuilder.output_path(out, "/../../escaped/")
+
+
+def test_site_templates_run_in_jinja_sandbox(tmp_path):
+    import pytest
+    from jinja2.exceptions import SecurityError
+
+    site_dir = _write_min_site(tmp_path, preset="academic")
+    override = site_dir / "templates" / "layouts" / "homepage.html.j2"
+    override.parent.mkdir(parents=True)
+    override.write_text(
+        "{{ cycler.__init__.__globals__.os.getcwd() }}", encoding="utf-8"
+    )
+    with pytest.raises(SecurityError):
+        build_site(load_site(site_dir), tmp_path / "public")
+
+
+def test_site_template_symlink_cannot_read_outside_site(tmp_path):
+    import pytest
+    from acadsite.render.engine import Engine
+
+    site_dir = _write_min_site(tmp_path, preset="academic")
+    outside = tmp_path / "secret-template.txt"
+    outside.write_text("PRIVATE TEMPLATE CONTENT", encoding="utf-8")
+    override = site_dir / "templates" / "layouts" / "homepage.html.j2"
+    override.parent.mkdir(parents=True)
+    try:
+        override.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlinks are unavailable: {exc}")
+
+    engine = Engine(load_site(site_dir))
+    source, filename, _ = engine.env.loader.get_source(
+        engine.env, "layouts/homepage.html.j2"
+    )
+    assert "PRIVATE TEMPLATE CONTENT" not in source
+    assert filename != str(outside)
+
+
+def test_site_asset_symlink_cannot_publish_outside_file(tmp_path):
+    import pytest
+    from acadsite.render.assets import UnsafeAssetError
+
+    site_dir = _write_min_site(tmp_path, preset="academic")
+    outside = tmp_path / "private.txt"
+    outside.write_text("PRIVATE ASSET CONTENT", encoding="utf-8")
+    link = site_dir / "assets" / "leak.txt"
+    link.parent.mkdir(parents=True)
+    try:
+        link.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlinks are unavailable: {exc}")
+
+    with pytest.raises(UnsafeAssetError, match="escapes"):
+        build_site(load_site(site_dir), tmp_path / "public")
+
+
+def test_unsafe_content_urls_are_neutralized(tmp_path):
+    from acadsite.render.engine import Engine
+
+    site = load_site(_write_min_site(tmp_path, preset="academic"))
+    engine = Engine(site)
+    assert engine.media_url("javascript:alert(1)") == "#"
+    assert engine.media_url("data:text/html,unsafe") == "#"
+    assert engine.media_url("https://example.com") == "https://example.com"

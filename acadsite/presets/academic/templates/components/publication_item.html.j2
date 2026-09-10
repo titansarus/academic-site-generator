@@ -1,7 +1,7 @@
 {% macro publication_item(item) %}
 <article class="pub-item" id="{{ item.slug }}">
   <p class="pub-title">
-    {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+    {% if item.url %}<a href="{{ item.url | media_url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
   </p>
   {% if item.authors %}<p class="pub-authors">{{ item.authors }}</p>{% endif %}
   {% if item.venue or item.year %}

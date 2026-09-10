@@ -9,6 +9,7 @@ where to find the preset's templates and static assets for the override chain.
 from __future__ import annotations
 
 import json
+import re
 from importlib import resources
 from pathlib import Path
 from typing import Any
@@ -18,8 +19,13 @@ class PresetError(Exception):
     """Raised when a preset is missing or malformed."""
 
 
+_PRESET_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+
+
 def preset_dir(name: str) -> Path:
     """Return the filesystem path to a packaged preset directory."""
+    if not _PRESET_NAME_RE.fullmatch(str(name)):
+        raise PresetError(f"Invalid preset name '{name}'.")
     base = resources.files("acadsite.presets") / name
     path = Path(str(base))
     if not path.is_dir():

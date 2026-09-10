@@ -1,7 +1,7 @@
 {
   "name": "academic",
   "description": "Academic preset: publication lists, timelines, project cards, blog, news, and freeform Markdown sections. All academic behavior is configuration and templates, never hardcoded engine logic.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "defaults": {
     "site": { "lang": "en" },
     "theme": { "default": "system", "accent": "blue" }

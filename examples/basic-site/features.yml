@@ -1,0 +1,24 @@
+# Global master switches. Set a value to false to hide it everywhere.
+publications: true
+experience: true
+projects: true
+blog: true
+personal_sections: true
+
+# Academic preset presentation. Logo data and assets remain when this is false.
+organization_logos: true
+
+# Homepage previews only.
+homepage:
+  publications: true
+  experience: true
+  projects: true
+  personal_sections: true
+
+# Standalone pages and their automatically generated navigation links.
+pages:
+  publications: true
+  experience: true
+  projects: true
+  blog: true
+  personal_sections: true

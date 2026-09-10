@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="acadsite-base-path" content="{{ base_path }}">
   <title>{% block title %}{{ page.title }} — {{ site.title }}{% endblock %}</title>
   <meta name="description" content="{{ page.description | default(site.description) | default('') }}">
   {% if site.author %}<meta name="author" content="{{ site.author }}">{% endif %}
@@ -15,6 +16,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>{{ site.favicon | default('✒️') }}</text></svg>">
   <script>
     (function () {
+      document.documentElement.classList.add('has-js');
       try {
         var pref = localStorage.getItem('acadsite-theme');
         var def = document.documentElement.getAttribute('data-theme-default');
@@ -26,7 +28,7 @@
   </script>
   {% if math_enabled %}
   <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };</script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" async></script>
   {% endif %}
 </head>
 <body>
@@ -35,7 +37,7 @@
     <header class="topbar">
       <a class="wordmark" href="{{ url() }}">{{ site.brand | default(site.title) }}</a>
       <nav class="topnav" aria-label="Primary">
-        {% for item in nav %}<a class="topnav-link{% if item.active %} here{% endif %}" href="{{ item.href }}">{{ item.label | lower }}</a>{% endfor %}
+        {% for item in nav %}<a class="topnav-link{% if item.active %} here{% endif %}" href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label | lower }}</a>{% endfor %}
         <button class="toggle" type="button" aria-label="Toggle dark mode" data-theme-toggle><span data-theme-label>☾</span></button>
       </nav>
     </header>
@@ -50,6 +52,7 @@
       <span>written by hand, built with a little Python generator</span>
     </footer>
   </div>
+  <script src="{{ asset('assets/js/navigation.js') }}" defer></script>
   <script src="{{ asset('assets/js/minimal.js') }}" defer></script>
 </body>
 </html>

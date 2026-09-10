@@ -7,6 +7,7 @@ from pathlib import Path
 
 _CONFIG = {
     "preset": "academic",
+    "features_file": "features.yml",
     "site": {"title": "New Site", "base_url": "", "base_path": "/"},
     "theme": {"default": "system", "accent": "blue"},
     "collections": {
@@ -26,6 +27,21 @@ _CONFIG = {
     },
     "pages": [{"title": "Notes", "slug": "notes", "layout": "collection_page", "collections": ["notes"]}],
 }
+
+_FEATURES = """# Global master switches. Set a value to false to hide it everywhere.
+notes: true
+
+# Academic preset presentation. Set false without removing logo data/assets.
+organization_logos: true
+
+# Homepage previews only.
+homepage:
+  notes: true
+
+# Standalone pages and their automatically generated navigation links.
+pages:
+  notes: true
+"""
 
 _PROFILE = {
     "name": "Your Name",
@@ -48,5 +64,6 @@ def scaffold_site(target: Path) -> None:
     (target / "content").mkdir(parents=True, exist_ok=True)
     (target / "assets").mkdir(parents=True, exist_ok=True)
     (target / "site.config.json").write_text(json.dumps(_CONFIG, indent=2), encoding="utf-8")
+    (target / "features.yml").write_text(_FEATURES, encoding="utf-8")
     (target / "content" / "profile.json").write_text(json.dumps(_PROFILE, indent=2), encoding="utf-8")
     (target / "content" / "notes.json").write_text(json.dumps(_NOTES, indent=2), encoding="utf-8")

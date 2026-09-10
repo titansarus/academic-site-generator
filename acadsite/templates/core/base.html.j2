@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="acadsite-base-path" content="{{ base_path }}">
   <title>{% block title %}{{ page.title }} · {{ site.title }}{% endblock %}</title>
   <meta name="description" content="{{ page.description | default(site.description) | default('') }}">
   {% if site.author %}<meta name="author" content="{{ site.author }}">{% endif %}
@@ -19,6 +20,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>{{ site.favicon | default('🎓') }}</text></svg>">
   <script>
     (function () {
+      document.documentElement.classList.add('has-js');
       try {
         var pref = localStorage.getItem('acadsite-theme');
         var def = document.documentElement.getAttribute('data-theme-default');
@@ -30,7 +32,7 @@
   </script>
   {% if math_enabled %}
   <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };</script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" async></script>
   {% endif %}
 </head>
 <body>
@@ -40,15 +42,15 @@
       <a class="brand" href="{{ url() }}">{{ site.brand | default(site.title) }}</a>
       <nav class="nav" aria-label="Primary">
         {% for item in nav %}
-        <a class="nav-link{% if item.active %} active{% endif %}" href="{{ item.href }}">{{ item.label }}</a>
+        <a class="nav-link{% if item.active %} active{% endif %}" href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
         {% endfor %}
       </nav>
       <div class="controls">
+        {% block layout_control %}{% endblock %}
         <button class="theme-toggle" type="button" aria-label="Toggle dark mode" data-theme-toggle>
-          <span class="theme-toggle-label" data-theme-label>Light</span>
-          <span class="theme-track"><span class="theme-knob"></span></span>
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"></path></svg>
         </button>
-        {% if site.cv %}<a class="btn btn-primary" href="{{ site.cv | media_url }}">View CV</a>{% endif %}
         <button class="mobile-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" data-mobile-toggle>
           <span></span><span></span><span></span>
         </button>
@@ -56,9 +58,8 @@
     </div>
     <nav class="mobile-nav" aria-label="Mobile" data-mobile-nav hidden>
       {% for item in nav %}
-      <a class="mobile-nav-link{% if item.active %} active{% endif %}" href="{{ item.href }}">{{ item.label }}</a>
+      <a class="mobile-nav-link{% if item.active %} active{% endif %}" href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
       {% endfor %}
-      {% if site.cv %}<a class="mobile-nav-link" href="{{ site.cv | media_url }}">View CV</a>{% endif %}
     </nav>
   </header>
 
@@ -85,6 +86,7 @@
     </div>
   </footer>
 
+  <script src="{{ asset('assets/js/navigation.js') }}" defer></script>
   <script src="{{ asset('assets/js/theme-toggle.js') }}" defer></script>
   <script src="{{ asset('assets/js/academic.js') }}" defer></script>
   {% if config.site.custom_js %}<script src="{{ asset('assets/js/site.js') }}" defer></script>{% endif %}

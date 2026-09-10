@@ -1,5 +1,5 @@
 {% macro personal_card(item) %}
-<a class="personal-card" href="{{ item.url | default('#') }}">
+<a class="personal-card" href="{{ item.url | default('#') | media_url }}">
   <p class="personal-card-title">{{ item.title }}</p>
   {% if item.category %}<span class="personal-card-cat">{{ item.category }}</span>{% endif %}
   {% if item.summary_html %}<div class="personal-card-text">{{ item.summary_html | safe }}</div>{% endif %}

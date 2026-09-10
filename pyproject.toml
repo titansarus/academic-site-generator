@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=83.0.0", "wheel>=0.46.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "acadsite"
-version = "0.1.0"
+version = "0.2.0"
 description = "A reusable Python static site generator with generic collections, pages, and components, plus an academic preset."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -12,9 +12,9 @@ license = { text = "MIT" }
 authors = [{ name = "Amirmahdi Namjoo", email = "amirm137878@gmail.com" }]
 keywords = ["static-site-generator", "academic", "jinja2", "markdown", "github-pages"]
 dependencies = [
-    "Jinja2>=3.1",
-    "Markdown>=3.5",
-    "PyYAML>=6.0",
+    "Jinja2>=3.1.6,<4",
+    "Markdown>=3.8.1,<4",
+    "PyYAML>=6.0.2,<7",
 ]
 
 [project.optional-dependencies]

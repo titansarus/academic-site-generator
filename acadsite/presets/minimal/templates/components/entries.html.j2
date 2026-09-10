@@ -1,6 +1,6 @@
 {# Entry macros for the minimal theme. Text-forward, single column, no cards. #}
 
-{% macro _primary(item) %}{% if item.url %}{{ item.url }}{% elif item.links %}{{ item.links[0].url | media_url }}{% elif item.doi %}https://doi.org/{{ item.doi }}{% else %}{% endif %}{% endmacro %}
+{% macro _primary(item) %}{% if item.url %}{{ item.url | media_url }}{% elif item.links %}{{ item.links[0].url | media_url }}{% elif item.doi %}https://doi.org/{{ item.doi }}{% else %}{% endif %}{% endmacro %}
 
 {% macro entry_links(item) %}
 {% set has = item.links or item.doi or item.github or (item.bibtex is defined and item.include_bibtex | default(true)) %}
@@ -34,7 +34,7 @@
 {% macro line_entry(item, compact=false) %}
 <li class="line">
   <div class="line-top">
-    <span class="line-what">{% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}{% if item.org %} <span class="line-where">· {{ item.org }}</span>{% endif %}</span>
+    <span class="line-what">{% if item.url %}<a href="{{ item.url | media_url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}{% if item.org %} <span class="line-where">· {{ item.org }}</span>{% endif %}</span>
     {% if item.display_date %}<span class="line-when">{{ item.display_date }}</span>{% endif %}
   </div>
   {% if item.location %}<div class="line-loc">{{ item.location }}</div>{% endif %}
@@ -58,7 +58,7 @@
 
 {% macro md_entry(item) %}
 <li class="note">
-  <a class="note-title" href="{{ item.url | default('#') }}">{{ item.title }}</a>
+  <a class="note-title" href="{{ item.url | default('#') | media_url }}">{{ item.title }}</a>
   {% if item.summary_html %}<span class="note-sum"> — {{ item.summary_html | safe }}</span>{% endif %}
 </li>
 {% endmacro %}

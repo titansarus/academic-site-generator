@@ -7,7 +7,7 @@
   {% endif %}
   <div class="card-body">
     <h3 class="card-title">
-      {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+      {% if item.url %}<a href="{{ item.url | media_url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
     </h3>
     {% if item.display_date %}<p class="card-date">{{ item.display_date }}</p>{% endif %}
     {% if item.summary_html %}<div class="card-summary">{{ item.summary_html | safe }}</div>{% endif %}

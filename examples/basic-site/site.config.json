@@ -1,5 +1,6 @@
 {
   "preset": "academic",
+  "features_file": "features.yml",
   "site": {
     "title": "Jordan Rivera",
     "brand": "J. Rivera",

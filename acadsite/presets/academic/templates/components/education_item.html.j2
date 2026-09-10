@@ -1,0 +1,14 @@
+{% macro education_item(item) %}
+<div class="education-item">
+  {% if features.get('organization_logos', true) and item.logo %}
+  <div class="education-logo"><img src="{{ item.logo | media_url }}" alt="{{ item.org }}"></div>
+  {% elif features.get('organization_logos', true) and item.logo_initials %}
+  <div class="education-logo education-logo-text">{{ item.logo_initials }}</div>
+  {% endif %}
+  <div class="education-body">
+    <p class="education-degree">{{ item.title }}</p>
+    <p class="education-school">{{ item.org }}</p>
+    <p class="education-meta">{% if item.location %}{{ item.location }} · {% endif %}{{ item.display_date }}</p>
+  </div>
+</div>
+{% endmacro %}

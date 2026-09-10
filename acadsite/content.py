@@ -17,6 +17,7 @@ from typing import Any
 from . import dates
 from .config import CollectionConfig, Site
 from .markdown import render_inline, render_markdown
+from .paths import SitePathError, resolve_within
 
 
 class ContentError(Exception):
@@ -71,7 +72,12 @@ def load_collection(site: Site, config: CollectionConfig) -> Collection:
     if not config.source:
         return Collection(config=config, items=[])
 
-    source_path = (site.root / config.source).resolve()
+    try:
+        source_path = resolve_within(
+            site.root, config.source, f"Collection '{config.key}' source"
+        )
+    except SitePathError as exc:
+        raise ContentError(str(exc)) from exc
     if not source_path.exists():
         raise ContentError(
             f"Collection '{config.key}' source not found: {config.source}"
@@ -116,8 +122,18 @@ def _normalize_item(
     body_html = ""
     body = item.get("body")
     if body:
-        candidate = site.root / body
-        if isinstance(body, str) and (body.endswith(".md") or candidate.exists()):
+        candidate = None
+        if isinstance(body, str):
+            try:
+                candidate = resolve_within(
+                    site.root,
+                    body,
+                    f"Collection '{config.key}' item body",
+                )
+            except SitePathError as exc:
+                if body.endswith(".md"):
+                    raise ContentError(str(exc)) from exc
+        if isinstance(body, str) and candidate is not None and (body.endswith(".md") or candidate.exists()):
             if candidate.exists():
                 body_html = render_markdown(candidate.read_text(encoding="utf-8"))
                 item["_body_source"] = body

@@ -14,7 +14,10 @@ from pathlib import Path
 
 from . import __version__
 from .config import ConfigError, load_site
-from .render.engine import build_site
+from .render.engine import UnsafeOutputError, build_site
+from .render.assets import UnsafeAssetError
+from .render.urls import UnsafeUrlError
+from .paths import SitePathError
 from .validation import validate_site
 
 
@@ -57,7 +60,11 @@ def _cmd_build(args: argparse.Namespace) -> int:
         for warning in report.warnings:
             print(f"warning: {warning}")
 
-    result = build_site(site, args.output, verbose=args.verbose)
+    try:
+        result = build_site(site, args.output, verbose=args.verbose)
+    except (SitePathError, UnsafeAssetError, UnsafeOutputError, UnsafeUrlError) as exc:
+        print(f"output error: {exc}", file=sys.stderr)
+        return 2
     for warning in result.warnings:
         print(f"warning: {warning}")
     output = Path(args.output).resolve()

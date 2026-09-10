@@ -31,6 +31,24 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 
+@keyframes page-content-in { from { opacity: 0; transform: translateY(4px); } }
+.has-js main { animation: page-content-in 250ms cubic-bezier(.2,.8,.2,1) both; }
+.has-js main#main { transition: opacity 180ms ease, transform 220ms cubic-bezier(.2,.8,.2,1); }
+.has-js main#main[data-transition-state="leaving"] { animation: none; opacity: 0; transform: translateY(-3px); }
+.has-js main#main[data-transition-state="entering"] { animation: none; opacity: 0; transform: translateY(5px); transition: none; }
+.navigation-status {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 body {
   margin: 0;
   background: var(--paper);
@@ -56,8 +74,10 @@ a:hover { text-decoration-color: var(--accent); }
 .topbar { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 30px 0 10px; }
 .wordmark { font-family: var(--font-display); font-weight: 600; font-size: 20px; color: var(--ink); text-decoration: none; }
 .topnav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; font-family: var(--font-mono); font-size: 13px; }
-.topnav-link { color: var(--muted); text-decoration: none; }
+.topnav-link { position: relative; color: var(--muted); text-decoration: none; transition: color 170ms ease; }
+.topnav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: center; transition: transform 180ms cubic-bezier(.2,.8,.2,1); }
 .topnav-link:hover { color: var(--ink); }
+.topnav-link:hover::after, .topnav-link.here::after { transform: scaleX(1); }
 .topnav-link.here { color: var(--accent); }
 .toggle { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--muted); padding: 0 2px; line-height: 1; }
 .toggle:hover { color: var(--accent); }
@@ -175,4 +195,6 @@ a:hover { text-decoration-color: var(--accent); }
   .hello { font-size: 29px; }
   .line-top { justify-content: flex-start; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

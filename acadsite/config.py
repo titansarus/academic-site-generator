@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from . import presets
+from .paths import SitePathError, resolve_within
 
 
 class ConfigError(Exception):
@@ -50,6 +51,69 @@ def deep_merge(base: dict, overlay: dict) -> dict:
     return result
 
 
+def _load_features(site_dir: Path, merged: dict) -> dict[str, Any]:
+    """Load optional feature flags shared by pages, collections, and sections."""
+    features: dict = {}
+    feature_file = merged.get("features_file")
+    if feature_file:
+        try:
+            path = resolve_within(site_dir, str(feature_file), "Features file")
+        except SitePathError as exc:
+            raise ConfigError(str(exc)) from exc
+        if not path.exists():
+            raise ConfigError(f"Features file not found: {path}")
+        loaded = _load_structured(path)
+        if not isinstance(loaded, dict):
+            raise ConfigError(f"Features file {path} must be a mapping of names to booleans.")
+        features = loaded
+
+    inline = merged.get("features", {})
+    if not isinstance(inline, dict):
+        raise ConfigError("Config field 'features' must be a mapping of names to booleans.")
+    features = deep_merge(features, inline)
+    for key, value in features.items():
+        if isinstance(value, dict):
+            for nested_key, nested_value in value.items():
+                if not isinstance(nested_value, bool):
+                    raise ConfigError(
+                        f"Feature '{key}.{nested_key}' must be true or false, "
+                        f"not {nested_value!r}."
+                    )
+        elif not isinstance(value, bool):
+            raise ConfigError(f"Feature '{key}' must be true or false, not {value!r}.")
+    return features
+
+
+def _enabled(
+    data: dict, key: str, features: dict[str, Any], scope: str | None = None
+) -> bool:
+    """Resolve an item's local ``enabled`` switch and optional feature key."""
+    feature_key = data.get("feature", key)
+    global_value = features.get(feature_key, True)
+    if not isinstance(global_value, bool):
+        global_value = True
+    scoped_values = features.get(scope, {}) if scope else {}
+    scoped_value = scoped_values.get(feature_key, True) if isinstance(scoped_values, dict) else True
+    return bool(data.get("enabled", True)) and global_value and scoped_value
+
+
+def _page_feature_key(page: dict) -> str:
+    """Use a page's collection key when possible so flags stay consistent."""
+    collections = page.get("collections", [])
+    return page.get("feature") or (collections[0] if collections else page.get("slug", ""))
+
+
+def _homepage_section_enabled(
+    section: dict, features: dict[str, Any], disabled_collections: set[str]
+) -> bool:
+    """Gate previews by collection while keeping heroes with optional collections."""
+    is_preview = section.get("type") == "collection_preview"
+    key = section.get("collection") if is_preview else section.get("type", "section")
+    return _enabled(section, key, features, scope="homepage") and not (
+        is_preview and section.get("collection") in disabled_collections
+    )
+
+
 def find_config_file(site_dir: Path) -> Path:
     """Locate the site config file inside ``site_dir``."""
     candidates = [
@@ -60,7 +124,10 @@ def find_config_file(site_dir: Path) -> Path:
         "config.json",
     ]
     for name in candidates:
-        candidate = site_dir / name
+        try:
+            candidate = resolve_within(site_dir, name, "Config file")
+        except SitePathError as exc:  # defensive: the candidate names are fixed
+            raise ConfigError(str(exc)) from exc
         if candidate.exists():
             return candidate
     raise ConfigError(
@@ -185,7 +252,10 @@ def load_site(
     """
     site_dir = Path(site_dir).resolve()
     if config_filename:
-        config_path = site_dir / config_filename
+        try:
+            config_path = resolve_within(site_dir, config_filename, "Config file")
+        except SitePathError as exc:
+            raise ConfigError(str(exc)) from exc
         if not config_path.exists():
             raise ConfigError(f"Config file not found: {config_path}")
     else:
@@ -206,16 +276,33 @@ def load_site(
             )
         merged = deep_merge(merged, environments[env])
 
+    features = _load_features(site_dir, merged)
+    merged["features"] = features
     site_meta = merged.get("site", {})
     theme = merged.get("theme", {"default": "system", "accent": "blue"})
 
+    all_collection_data = merged.get("collections", {})
+    disabled_collections = {
+        key for key, data in all_collection_data.items() if not _enabled(data, key, features)
+    }
     collections = {
         key: CollectionConfig.from_dict(key, data)
-        for key, data in merged.get("collections", {}).items()
+        for key, data in all_collection_data.items()
+        if key not in disabled_collections
     }
-    pages = [PageConfig.from_dict(p) for p in merged.get("pages", [])]
-    homepage = merged.get("homepage", {})
-    nav = _resolve_nav(merged, pages)
+    pages = [
+        PageConfig.from_dict(p)
+        for p in merged.get("pages", [])
+        if _enabled(p, _page_feature_key(p), features, scope="pages")
+        and not any(key in disabled_collections for key in p.get("collections", []))
+    ]
+    homepage = copy.deepcopy(merged.get("homepage", {}))
+    homepage["sections"] = [
+        section
+        for section in homepage.get("sections", [])
+        if _homepage_section_enabled(section, features, disabled_collections)
+    ]
+    nav = _resolve_nav(merged, pages, features)
 
     return Site(
         root=site_dir,
@@ -230,10 +317,19 @@ def load_site(
     )
 
 
-def _resolve_nav(merged: dict, pages: list[PageConfig]) -> list[dict]:
+def _resolve_nav(merged: dict, pages: list[PageConfig], features: dict[str, Any]) -> list[dict]:
     """Return an explicit nav if configured, else derive one from pages."""
     if "nav" in merged and merged["nav"]:
-        return [dict(item) for item in merged["nav"]]
+        return [
+            dict(item)
+            for item in merged["nav"]
+            if _enabled(
+                item,
+                item.get("feature", item.get("slug", item.get("label", "nav"))),
+                features,
+                scope="navigation",
+            )
+        ]
     nav = [{"label": "Home", "slug": "", "href": None}]
     for page in pages:
         if page.nav:

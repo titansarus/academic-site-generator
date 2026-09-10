@@ -1,5 +1,5 @@
 // Light/dark theme toggle. The initial theme is set inline in <head> to avoid
-// a flash; this script only wires up the toggle button and label.
+// a flash; this script only wires up the compact day/night icon button.
 (function () {
   var root = document.documentElement;
   var KEY = 'acadsite-theme';
@@ -10,11 +10,10 @@
 
   function syncLabels() {
     var isDark = current() === 'dark';
-    document.querySelectorAll('[data-theme-label]').forEach(function (el) {
-      el.textContent = isDark ? 'Dark' : 'Light';
-    });
     document.querySelectorAll('[data-theme-toggle]').forEach(function (el) {
       el.setAttribute('aria-pressed', String(isDark));
+      el.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      el.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
     });
   }
 

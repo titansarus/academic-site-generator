@@ -3,7 +3,7 @@
 <section class="md-section" id="{{ item.slug }}">
   <div class="md-section-head">
     <h3 class="md-section-title">
-      {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+      {% if item.url %}<a href="{{ item.url | media_url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
     </h3>
     {% if item.category %}<span class="md-section-cat">{{ item.category }}</span>{% endif %}
   </div>

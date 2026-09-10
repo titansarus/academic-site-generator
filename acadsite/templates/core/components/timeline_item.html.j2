@@ -2,15 +2,15 @@
 {% from "components/link_list.html.j2" import link_list %}
 {% macro timeline_item(item, compact=false) %}
 <div class="exp-item">
-  {% if item.logo %}
+  {% if features.get('organization_logos', true) and item.logo %}
   <div class="exp-logo"><img src="{{ item.logo | media_url }}" alt="{{ item.org | default(item.title) }}"></div>
-  {% elif item.logo_initials %}
+  {% elif features.get('organization_logos', true) and item.logo_initials %}
   <div class="exp-logo exp-logo-text">{{ item.logo_initials }}</div>
   {% endif %}
   <div class="exp-body">
     <div class="exp-head">
       <p class="exp-title">
-        {% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+        {% if item.url %}<a href="{{ item.url | media_url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
         {% if item.org %}<span class="exp-org">· {{ item.org }}</span>{% endif %}
       </p>
       {% if item.display_date %}<span class="exp-date">{{ item.display_date }}</span>{% endif %}

@@ -58,3 +58,62 @@ def test_template_override_precedence(tmp_path, example_site_dir):
         **{**engine.base_context(), "page": {"title": "X", "slug": "x"},
            "collections": [], "collection": None, "body_html": ""}
     )
+
+
+def test_validation_rejects_unsafe_page_and_item_routes(tmp_path):
+    site_dir = tmp_path / "site"
+    (site_dir / "content").mkdir(parents=True)
+    (site_dir / "content" / "items.json").write_text(
+        json.dumps([{"title": "Unsafe", "slug": "../../outside"}]),
+        encoding="utf-8",
+    )
+    (site_dir / "site.config.json").write_text(
+        json.dumps(
+            {
+                "preset": "academic",
+                "site": {"title": "T", "base_path": "/"},
+                "collections": {
+                    "items": {
+                        "slug": "items",
+                        "source": "content/items.json",
+                        "detail_pages": True,
+                    }
+                },
+                "pages": [
+                    {
+                        "title": "Unsafe page",
+                        "slug": "../outside",
+                        "collections": ["items"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    report = validate_site(load_site(site_dir))
+    assert not report.ok
+    assert sum("traversal" in error for error in report.errors) == 2
+
+
+def test_validation_rejects_schema_path_traversal(tmp_path):
+    site_dir = tmp_path / "site"
+    (site_dir / "content").mkdir(parents=True)
+    (site_dir / "content" / "items.json").write_text("[]", encoding="utf-8")
+    (site_dir / "site.config.json").write_text(
+        json.dumps(
+            {
+                "preset": "academic",
+                "site": {"title": "T"},
+                "collections": {
+                    "items": {
+                        "source": "content/items.json",
+                        "schema": "../../outside",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    report = validate_site(load_site(site_dir))
+    assert not report.ok
+    assert any("Schema" in error and "escapes" in error for error in report.errors)
