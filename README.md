@@ -1,5 +1,18 @@
 # acadsite — Academic Static Site Generator
 
+
+## Disclaimer
+
+Note: Most of this project was done using multiple AI agent tools, including OpenAI Codex and Claude Code.
+
+I wanted to personally evaluate their workflow and how well they could follow the instructions I gave them for building a modular academic site generator (think of it like Jekyll), and then creating a website for myself using this academic site generator.
+
+Based on my testing, the code is stable enough and is written in a way that an AI agent can easily understand. Therefore, anyone should be able to use it to generate a website for themselves, especially if they ask an AI agent to build the website based on this Academic Site Generator.
+
+However, obviously, use this at your own risk. I do not take any responsibility for any malfunctions in the code, and I do not plan to actively maintain it unless I need to add or modify a feature for my own website.
+
+
+## Introduction 
 A small, reusable Python static site generator. The core engine is
 **domain-agnostic**: it knows about *config*, *collections*, *pages*,
 *components*, *templates*, and *static assets*. Everything academic
