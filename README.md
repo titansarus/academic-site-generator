@@ -3,7 +3,7 @@
 
 ## Disclaimer
 
-Note: Most of this project was done using multiple AI agent tools, including OpenAI Codex and Claude Code.
+Most of this project was done using multiple AI agent tools, including OpenAI Codex and Claude Code.
 
 I wanted to personally evaluate their workflow and how well they could follow the instructions I gave them for building a modular academic site generator (think of it like Jekyll), and then creating a website for myself using this academic site generator.
 
